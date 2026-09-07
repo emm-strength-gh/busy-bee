@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>World Clock — 5 zones</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +38,7 @@
     -webkit-font-smoothing:antialiased;
     display:flex;
     justify-content:center;
-    padding:22px 16px 16px;
+    padding:calc(22px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
     transition:background .4s ease,color .4s ease;
   }
   .shell{

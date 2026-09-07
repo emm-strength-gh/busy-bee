@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Markdown Viewer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 20px;
+    padding: calc(12px + env(safe-area-inset-top)) 20px 12px;
     background: var(--bg);
     border-bottom: 1px solid var(--border);
   }
@@ -91,9 +91,9 @@
     flex-shrink: 0;
     padding: 28px 12px 40px 20px;
     position: sticky;
-    top: 53px;
+    top: calc(53px + env(safe-area-inset-top));
     align-self: flex-start;
-    max-height: calc(100vh - 53px);
+    max-height: calc(100vh - 53px - env(safe-area-inset-top));
     overflow-y: auto;
     font-size: 13px;
   }
