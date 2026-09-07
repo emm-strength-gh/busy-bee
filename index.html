@@ -1111,7 +1111,7 @@
       <!-- OVERVIEW (default landing) -->
       <section class="view active" id="overviewView">
         <h1 class="page-title">Overview</h1>
-        <p class="session-note">Heads-up: your data lives only in this tab. Refreshing or closing it clears everything — use <b>Save backup</b> to keep a JSON file.</p>
+        <p class="session-note">Your lists are saved automatically in this browser, so closing and reopening keeps everything. That said, browser storage can still be cleared (private browsing, clearing site data, a new device) — use <b>Save backup</b> now and then to keep a portable JSON file too.</p>
         <div id="overviewCards"></div>
       </section>
 
@@ -2135,9 +2135,22 @@
     });
   }
 
-  // ---------- Persistence: NONE. Everything lives in memory only. ----------
-  // A page refresh erases all data. The JSON file (Save/Open) is the only way to keep it.
+  // ---------- Persistence: localStorage, so closing/reopening keeps your data. ----------
+  // Locked lists are stored encrypted (buildSnapshot() re-encrypts before every write), so
+  // nothing sensitive ever sits in localStorage as plaintext. Opening a JSON/CSV backup file
+  // replaces this saved session outright (see importJSON/importCSV) — that's the "open a new
+  // file starts fresh" behavior. Writes are debounced so rapid edits (typing, toggling) don't
+  // hammer localStorage on every keystroke.
   var dirty = false; // true when there are in-memory changes not yet written to a JSON file
+  var saveTimer = null;
+  var SAVE_DEBOUNCE_MS = 500;
+
+  function persistNow() {
+    buildSnapshot().then(function (snap) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(snap)); } catch (e) { /* quota exceeded or storage disabled — keep working in-memory */ }
+    });
+  }
+  function flushSaveNow() { clearTimeout(saveTimer); saveTimer = null; persistNow(); }
 
   // Build a serializable snapshot; locked lists are encrypted (never plaintext).
   function buildSnapshot() {
@@ -2165,8 +2178,13 @@
     });
     return chain.then(function () { return { app: "Busy Bee", version: 5, savedAt: new Date().toISOString(), lists: out }; });
   }
-  // No disk write — just flag that there's unsaved work for the refresh/close warning.
-  function save() { dirty = true; }
+  // Marks unsaved-to-file state (for the close/refresh warning) and schedules a debounced
+  // localStorage write so the change survives closing and reopening the app.
+  function save() {
+    dirty = true;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistNow, SAVE_DEBOUNCE_MS);
+  }
 
   // Re-lock unlocked protected lists: re-encrypt their contents in memory, then wipe
   // the decrypted items and key so opening asks for the password again.
@@ -2180,13 +2198,24 @@
       if (done) done();
     });
   }
-  // Start empty every session, and remove anything earlier versions left in localStorage.
   function load() {
-    try {
-      [STORE_KEY, LEGACY_V3, LEGACY_V2, LEGACY_V1].forEach(function (k) {
-        try { localStorage.removeItem(k); } catch (e) {}
-      });
-    } catch (e) {}
+    // Clean up anything left by long-retired storage formats — only STORE_KEY is current.
+    [LEGACY_V3, LEGACY_V2, LEGACY_V1].forEach(function (k) {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    var raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch (e) {}
+    if (raw) {
+      try {
+        var saved = JSON.parse(raw);
+        var rawLists = Array.isArray(saved) ? saved : (saved && Array.isArray(saved.lists) ? saved.lists : null);
+        if (rawLists) {
+          DATA.lists = hydrateLists(rawLists);
+          ensureBuiltins();
+          return;
+        }
+      } catch (e) { /* corrupted save — fall through to a fresh start below */ }
+    }
     DATA.lists = seedBuiltins();
   }
 
@@ -2307,7 +2336,7 @@
     DATA.lists = next;
     selected = {}; currentListId = null; unlocked = {}; sessionKey = {};
     resetDailies();
-    dirty = false; renderHome(); renderCounters();
+    dirty = false; persistNow(); renderHome(); renderCounters();
     toast("Imported " + count + " todo" + (count === 1 ? "" : "s") + ".");
   }
 
@@ -2324,7 +2353,7 @@
     ensureBuiltins();
     selected = {}; currentListId = null; unlocked = {}; sessionKey = {};
     resetDailies();
-    dirty = false; renderHome(); renderCounters();
+    dirty = false; persistNow(); renderHome(); renderCounters();
     var items = DATA.lists.reduce(function (a, l) { return a + l.items.length; }, 0);
     toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + ".");
   }
@@ -3757,11 +3786,18 @@
     renderStats();
   }
   setInterval(checkRollover, 30000);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) checkRollover(); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) { checkRollover(); return; }
+    flushSaveNow(); // app backgrounded/tab hidden — iOS/PWA rarely fire beforeunload, so flush here
+  });
+  window.addEventListener("pagehide", flushSaveNow);
   window.addEventListener("focus", checkRollover);
 
-  // Nothing is persisted to disk — warn before a refresh/close would discard unsaved work.
+  // Nothing is persisted to disk (as a portable file) — warn before a refresh/close would
+  // discard unsaved-to-file work. The in-memory session itself is still safe: flush any
+  // pending debounced localStorage write immediately so the last edit isn't lost.
   window.addEventListener("beforeunload", function (e) {
+    flushSaveNow();
     if (dirty) { e.preventDefault(); e.returnValue = ""; return ""; }
   });
 
