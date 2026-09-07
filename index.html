@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Busy Bee 🐝</title>
+
+<!-- PWA: manifest + icons + theme color -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#2e5a4e" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<!-- iOS "Add to Home Screen" support (Safari doesn't read the manifest for these) -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Busy Bee" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -167,7 +178,15 @@
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 14px;
     padding: 13px 24px; background: var(--bg); border-bottom: 1px solid var(--border);
   }
-  .top-date { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .top-date-wrap { display: flex; align-items: center; gap: 8px; }
+  .top-day, .top-daynum {
+    font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    white-space: nowrap; padding: 6px 12px; border-radius: 999px;
+  }
+  .top-day { color: var(--pine); background: rgba(46,90,78,.12); }
+  .top-daynum { color: #8a5a12; background: rgba(176,124,18,.14); }
+  html[data-theme="dark"] .top-day { background: rgba(107,191,163,.16); }
+  html[data-theme="dark"] .top-daynum { color: #e0a94a; background: rgba(224,169,74,.18); }
   .top-search { position: relative; margin-left: auto; width: min(360px, 50%); }
   .top-search input { width: 100%; font-family: inherit; font-size: 14px; color: var(--ink); padding: 9px 36px 9px 36px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); }
   .top-search input::placeholder { color: var(--faint); }
@@ -208,14 +227,25 @@
   .row-del svg { width: 16px; height: 16px; }
 
   /* Floating action button */
+  .fab-row { position: fixed; right: 24px; bottom: 24px; z-index: 80; display: flex; align-items: center; gap: 12px; }
   .fab {
-    position: fixed; right: 24px; bottom: 24px; z-index: 80;
+    position: static;
     display: inline-flex; align-items: center; gap: 8px; padding: 13px 20px 13px 16px;
     background: var(--pine); color: #fff; border-radius: 999px; font-size: 15px; font-weight: 600;
     box-shadow: 0 10px 30px rgba(27,36,32,.28);
   }
   .fab:hover { background: var(--pine-dark); }
   .fab svg { width: 20px; height: 20px; }
+
+  .fab-icon-btn {
+    width: 48px; height: 48px; flex: none; display: grid; place-items: center;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--border-strong);
+    border-radius: 50%; cursor: pointer; box-shadow: 0 8px 22px rgba(27,36,32,.16);
+    transition: background .15s ease, transform .12s ease, border-color .15s ease;
+  }
+  .fab-icon-btn:hover { background: var(--bg); border-color: var(--pine); transform: translateY(-1px); }
+  .fab-icon-btn:active { transform: translateY(0) scale(.94); }
+  .fab-icon-btn svg { width: 20px; height: 20px; stroke: currentColor; display: block; }
 
   .scrim { display: none; }
 
@@ -922,6 +952,55 @@
   }
   .fd-dir-btn:hover { border-color: var(--pine); color: var(--pine); }
   .nav-item#navJsonTool.active .nav-ic svg { stroke: #fff; }
+
+  /* ---------- Monthly Summary & Analysis ---------- */
+  .fd-sum-open-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--pine); color: #fff; border: 1px solid var(--pine); padding: 9px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .fd-sum-open-btn:hover { background: var(--pine-dark); }
+  .fd-sum-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 4px 0 8px; }
+  .fd-sum-toolbar .btn-solid, .fd-sum-toolbar .btn-ghost { border-radius: 999px; }
+  .fd-sum-hint { font-size: 12.5px; color: var(--faint); margin: 0 0 20px; }
+  .fd-sum-lede { font-size: 15px; line-height: 1.65; color: var(--ink); }
+  .fd-sum-lede p { margin: 0; }
+  .fd-sum-lede b { font-weight: 600; color: var(--ink); }
+  .fd-sum-cap { font-size: 12.5px; color: var(--muted); margin: -6px 0 12px; }
+  .fd-sum-empty { border: none !important; text-align: left !important; color: var(--faint); padding: 14px 4px !important; white-space: normal !important; font-size: 13.5px; }
+  .fd-sum-tablewrap { overflow-x: auto; }
+  .fd-sum-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .fd-sum-table th, .fd-sum-table td { border: 1px solid var(--border-strong); padding: 8px 12px; text-align: center; white-space: nowrap; }
+  .fd-sum-table thead th { background: #d98b3a; color: #fff; font-weight: 700; font-family: "Bricolage Grotesque", sans-serif; letter-spacing: .01em; }
+  .fd-sum-table thead th:first-child { text-align: left; }
+  .fd-sum-table tbody th { background: #e0a04a; color: #fff; text-align: left; font-weight: 600; }
+  .fd-sum-table tbody td { background: var(--surface); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .fd-sum-table tbody tr:nth-child(even) td { background: #fbf3e6; }
+  html[data-theme="dark"] .fd-sum-table tbody tr:nth-child(even) td { background: #2a2419; }
+  .fd-sum-table td[contenteditable]:hover { outline: 2px solid rgba(217,139,58,.4); outline-offset: -2px; cursor: text; }
+  .fd-sum-table td[contenteditable]:focus { outline: 2px solid #d98b3a; outline-offset: -2px; background: #fff8ef; }
+  html[data-theme="dark"] .fd-sum-table td[contenteditable]:focus { background: #33291a; }
+  .fd-obs { font-size: 14.5px; line-height: 1.7; color: var(--ink); outline: none; padding: 2px; }
+  .fd-obs:focus { box-shadow: 0 0 0 3px rgba(46,90,78,.12); border-radius: 8px; }
+  .fd-obs p { margin: 0 0 12px; }
+  .fd-obs p:last-child { margin-bottom: 0; }
+  .fd-obs b { font-weight: 700; }
+  .fd-print-head { display: none; }
+
+  /* Print / Save-as-PDF: only the active Summary view, cleaned up */
+  @media print {
+    .fd-sum-toolbar, .jt-back-row, .fd-sum-hint, .fd-desc, .sidebar, .topbar { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .content { max-width: none; margin: 0; padding: 0; }
+    #freshdeskView, #fdTicketsView { display: none !important; }
+    #fdSummaryView .jt-card { box-shadow: none; border: 1px solid #d9d9d9; break-inside: avoid; page-break-inside: avoid; margin-bottom: 14px; }
+    #fdSummaryView .page-title { color: #b06a12; }
+    .fd-print-head { display: block; margin: 0 0 14px; }
+    .fd-sum-table { font-size: 11px; }
+    .fd-sum-table th, .fd-sum-table td { padding: 5px 7px; }
+    .fd-sum-table thead th, .fd-sum-table tbody th,
+    .fd-sum-table tbody tr:nth-child(even) td {
+      -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+    }
+    .fd-sum-table thead th { background: #d98b3a !important; color: #fff !important; }
+    .fd-sum-table tbody th { background: #e0a04a !important; color: #fff !important; }
+  }
 </style>
 </head>
 <body>
@@ -988,7 +1067,12 @@
         </span>
         <span class="nav-label">World Clock</span>
       </button>
-      <button class="nav-item" id="themeBtn"><span class="nav-ic" id="themeIc"></span><span class="nav-label" id="themeLabel">Dark mode</span></button>
+      <button class="nav-item hidden" id="pwaInstallBtn" type="button" title="Install Busy Bee as an app on this device">
+        <span class="nav-ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        </span>
+        <span class="nav-label">Install App</span>
+      </button>
       <button class="nav-item" id="openBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></span><span class="nav-label">Open file</span></button>
       <button class="nav-item" id="saveBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 3v5h7"/><path d="M12 17v-5"/><path d="m9 14 3 3 3-3"/></svg></span><span class="nav-label">Save backup</span></button>
       <button class="nav-item" id="csvBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v8"/></svg></span><span class="nav-label">Export CSV</span></button>
@@ -1000,7 +1084,10 @@
       <button class="icon-btn menu" id="menuBtn" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
       </button>
-      <div class="top-date" id="topDate"></div>
+      <div class="top-date-wrap">
+        <span class="top-day" id="topDay"></span>
+        <span class="top-daynum" id="topDayNum"></span>
+      </div>
       <div class="top-search">
         <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         <input id="searchInput" type="search" placeholder="Search entries…" autocomplete="off" />
@@ -1334,6 +1421,7 @@
           <div class="fd-toolbar">
             <span class="fd-range" id="fdRange"></span>
             <div class="fd-toolbar-actions">
+              <button class="fd-sum-open-btn" id="fdSummaryBtn" type="button">&#128203; Summary &amp; Analysis</button>
               <div class="fd-seg" id="fdRangeSeg" role="group" aria-label="Date range">
                 <button type="button" class="fd-seg-btn active" data-range="all">All</button>
                 <button type="button" class="fd-seg-btn" data-range="7d">7 days</button>
@@ -1512,6 +1600,53 @@
             </label>
           </div>
           <div class="fd-tablewrap fd-tablewrap-persist"><table class="fd-table fd-tickets-table" id="fdTicketsTable"></table></div>
+        </div>
+      </section>
+
+      <!-- FreshDesk: Monthly Summary & Analysis -->
+      <section class="view" id="fdSummaryView">
+        <div class="jt-back-row">
+          <button class="jt-back-btn" id="fdSummaryBackBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            FreshDesk Report
+          </button>
+        </div>
+
+        <div class="fd-print-head">
+          <h1 class="page-title" style="margin-bottom:2px;">FD Analyzer &mdash; Monthly Summary &amp; Analysis</h1>
+          <p class="jt-sub" id="fdSumPrintDate"></p>
+        </div>
+
+        <h1 class="page-title" style="margin-bottom:4px;">Monthly Summary &amp; Analysis</h1>
+        <p class="jt-sub">Every figure below is calculated from the CSV currently loaded on the report page, broken down by month.</p>
+
+        <div class="fd-sum-toolbar">
+          <button class="btn-solid" id="fdSumPrintBtn" type="button">&#128424;&#65039; Print / Save as PDF</button>
+          <button class="btn-ghost" id="fdSumWordBtn" type="button">&#128221; Export to Word</button>
+          <button class="btn-ghost" id="fdSumResetBtn" type="button">&#8635; Refresh from data</button>
+        </div>
+        <p class="fd-sum-hint">Tables and observations are generated from the loaded data. You can click any value to tweak it before exporting (edits are included in the PDF/Word output); &ldquo;Refresh from data&rdquo; recalculates everything from the CSV.</p>
+
+        <div class="jt-card">
+          <p class="jt-card-label">Written summary</p>
+          <div class="fd-sum-lede" id="fdSumLede"></div>
+        </div>
+
+        <div class="jt-card">
+          <p class="jt-card-label">Tickets &mdash; monthly breakdown</p>
+          <p class="fd-sum-cap" id="fdSumMetricsCap"></p>
+          <div class="fd-sum-tablewrap"><table class="fd-sum-table" id="fdSumMetrics"></table></div>
+        </div>
+
+        <div class="jt-card">
+          <p class="jt-card-label">Helpdesk performance</p>
+          <p class="fd-sum-cap" id="fdSumPerfCap"></p>
+          <div class="fd-sum-tablewrap"><table class="fd-sum-table" id="fdSumPerf"></table></div>
+        </div>
+
+        <div class="jt-card">
+          <p class="jt-card-label">Key observations</p>
+          <div class="fd-obs" id="fdSumObs" contenteditable="true"></div>
         </div>
       </section>
 
@@ -1695,10 +1830,15 @@
   </aside>
 </div>
 
-<button class="fab" id="fab" title="New">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-  <span class="fab-label">New Entry</span>
-</button>
+<div class="fab-row">
+  <button class="fab-icon-btn" id="themeFabBtn" type="button" title="Toggle dark / light mode" aria-label="Toggle dark or light mode">
+    <span id="themeIc"></span>
+  </button>
+  <button class="fab" id="fab" title="New">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    <span class="fab-label">New Entry</span>
+  </button>
+</div>
 
 <!-- New list modal -->
 <div class="modal-overlay" id="addModal">
@@ -2253,9 +2393,12 @@
   // ---------- Render: top date, sidebar, overview ----------
   function updateDate() {
     try {
-      var s = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
-      $("topDate").textContent = s.toUpperCase();
-    } catch (e) { $("topDate").textContent = "TODAY"; }
+      var now = new Date();
+      var day = now.toLocaleDateString(undefined, { weekday: "long" });
+      var dnum = now.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      $("topDay").textContent = day.toUpperCase();
+      $("topDayNum").textContent = dnum.toUpperCase();
+    } catch (e) { $("topDay").textContent = "TODAY"; $("topDayNum").textContent = ""; }
   }
 
   function lockGlyph() {
@@ -3227,6 +3370,7 @@
     $("worldClockView").classList.toggle("active", view === "world-clock");
     $("freshdeskView").classList.toggle("active", view === "freshdesk");
     $("fdTicketsView").classList.toggle("active", view === "fd-tickets");
+    $("fdSummaryView").classList.toggle("active", view === "fd-summary");
     $("jiraView").classList.toggle("active", view === "jira");
     $("twilioView").classList.toggle("active", view === "twilio");
     updateNavActive();
@@ -3380,6 +3524,7 @@
   $("navJira").addEventListener("click", function () { relockAll(function () { show("jira"); }); });
   $("navTwilio").addEventListener("click", function () { relockAll(function () { show("twilio"); }); });
   $("fdTicketsBackBtn").addEventListener("click", function () { show("freshdesk"); });
+  $("fdSummaryBackBtn").addEventListener("click", function () { show("freshdesk"); });
   (function () {
     function openDrill(row) {
       if (!row) return;
@@ -3565,7 +3710,9 @@
     $("themeIc").innerHTML = theme === "dark"
       ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.3 17.7-1.4 1.4"/><path d="m19.1 4.9-1.4 1.4"/></svg>'
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
-    $("themeLabel").textContent = theme === "dark" ? "Light mode" : "Dark mode";
+    var label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    $("themeFabBtn").title = label;
+    $("themeFabBtn").setAttribute("aria-label", label);
   }
   function initTheme() {
     var saved;
@@ -3573,7 +3720,7 @@
     if (!saved) saved = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
     applyTheme(saved);
   }
-  $("themeBtn").addEventListener("click", function () {
+  $("themeFabBtn").addEventListener("click", function () {
     var next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
     applyTheme(next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
@@ -3628,8 +3775,16 @@
   try {
     var sess = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
     if (sess && sess.view) {
-      var v = (sess.view === "fd-tickets") ? "freshdesk" : sess.view;
+      var v = (sess.view === "fd-tickets" || sess.view === "fd-summary") ? "freshdesk" : sess.view;
       if (["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "freshdesk", "jira", "twilio"].indexOf(v) !== -1) initialView = v;
+    }
+  } catch (e) {}
+  // A "?view=" URL param (used by the PWA manifest's app shortcuts / home-screen long-press
+  // menu) takes priority over the restored session, so a shortcut always lands where it says.
+  try {
+    var qp = new URLSearchParams(window.location.search).get("view");
+    if (qp && ["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "freshdesk", "jira", "twilio"].indexOf(qp) !== -1) {
+      initialView = qp;
     }
   } catch (e) {}
   show(initialView);
@@ -5509,6 +5664,353 @@
         try { localStorage.removeItem(FD_KEY); } catch (e2) {}
       }
     })();
+
+    // ─── Monthly Summary & Analysis (all figures derived from the loaded CSV) ─
+    var FD_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var FD_PRI_RANK2 = { 'urgent': 0, 'critical': 0, 'high': 1, 'medium': 2, 'med': 2, 'normal': 2, 'low': 3 };
+
+    // In-session state: the last-computed tables + editable observations.
+    var sumMonths = [], sumRowsA = [], sumRowsB = [], sumMetrics = [], sumPerf = [], sumObs = '';
+    var sumHasData = false;
+
+    function fdSumGetData(kind) { return kind === 'perf' ? sumPerf : sumMetrics; }
+    function fdTitleCase(s) { s = String(s || ''); return s ? (s.charAt(0).toUpperCase() + s.slice(1)) : s; }
+
+    function fdMonthKeySum(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
+    function fdMonthLabel(key) { var p = key.split('-'); return FD_MONTH_NAMES[(+p[1]) - 1] + '-' + p[0].slice(2); }
+    function fdMonthStart(key) { var p = key.split('-'); return new Date(+p[0], (+p[1]) - 1, 1, 0, 0, 0, 0); }
+    function fdMonthEnd(key) { var p = key.split('-'); return new Date(+p[0], (+p[1]), 0, 23, 59, 59, 999); }
+    function fdMonthRange(minKey, maxKey) {
+      var out = [], p = minKey.split('-'), y = +p[0], m = +p[1];
+      var ep = maxKey.split('-'), ey = +ep[0], em = +ep[1], guard = 0;
+      while ((y < ey || (y === ey && m <= em)) && guard < 240) {
+        out.push(y + '-' + ('0' + m).slice(-2)); m++; if (m > 12) { m = 1; y++; } guard++;
+      }
+      return out;
+    }
+    function fdPriOrder(values) {
+      return values.slice().sort(function (a, b) {
+        var ra = FD_PRI_RANK2[a.toLowerCase()], rb = FD_PRI_RANK2[b.toLowerCase()];
+        if (ra != null && rb != null) return ra - rb;
+        if (ra != null) return -1;
+        if (rb != null) return 1;
+        return a.localeCompare(b);
+      });
+    }
+
+    // Data-driven narrative paragraph built from the currently-loaded CSV.
+    function fdBuildLiveSummary() {
+      var A = fdCurrent;
+      if (!A) {
+        return '<p style="color:var(--faint)">Load a Freshdesk CSV on the report page — the written summary and the monthly tables below are all generated from it.</p>';
+      }
+      var parts = [];
+      var range = A.created.min ? (A.created.min + ' to ' + A.created.max) : 'the loaded period';
+      var perDay = A.dayPairs.length ? Math.round(A.total / A.dayPairs.length * 10) / 10 : 0;
+      var resolvedPct = A.total ? Math.round(A.closedCount / A.total * 100) : 0;
+      var open = A.total - A.closedCount;
+      parts.push('The loaded export covers <b>' + fdEsc(range) + '</b> and contains <b>' + A.total + '</b> tickets' +
+        (perDay ? (' (about <b>' + perDay + '</b> per day)') : '') + '. <b>' + resolvedPct + '%</b> (' + A.closedCount +
+        ') have reached a closed state, leaving <b>' + open + '</b> still open.');
+      var medFrt = fdMedian(A.frt), medRes = fdMedian(A.res);
+      if (medFrt != null || medRes != null) {
+        parts.push('Typical first response was <b>' + fdFmtHrs(medFrt) + '</b> and typical resolution <b>' + fdFmtHrs(medRes) + '</b> (medians).');
+      }
+      var mi = fdMean(A.inter);
+      if (mi != null && A.inter.length) {
+        var oneTouch = 0;
+        for (var k = 0; k < A.inter.length; k++) { if (Math.round(A.inter[k]) <= 1) oneTouch++; }
+        var otp = Math.round(oneTouch / A.inter.length * 100);
+        parts.push('Tickets averaged <b>' + (Math.round(mi * 10) / 10) + '</b> customer interactions each, with <b>' + otp + '%</b> resolved in a single touch.');
+      }
+      if (A.agents && A.agents.length) {
+        var a0 = A.agents[0];
+        parts.push('The busiest agent was <b>' + fdEsc(a0.name) + '</b> (' + a0.n + ' tickets).');
+      }
+      if (A.cols.cArea) {
+        var areas = fdCounts(A.objs, A.cols.cArea);
+        if (areas.length && areas[0][0] !== '(blank)') parts.push('The most common root-cause area was <b>' + fdEsc(areas[0][0]) + '</b> (' + areas[0][1] + ' tickets).');
+      }
+      return '<p>' + parts.join(' ') + '</p>';
+    }
+
+    // Flatten each ticket into the fields the monthly roll-up needs.
+    function fdMonthlyRecords(A) {
+      var c = A.cols;
+      return A.objs.map(function (o) {
+        var created = c.cCreated ? fdParseTs(o[c.cCreated]) : null;
+        var resolved = c.cResolved ? fdParseTs(o[c.cResolved]) : null;
+        if (!resolved && c.cClosed) resolved = fdParseTs(o[c.cClosed]);
+        var inter = c.cInter ? parseFloat(o[c.cInter]) : NaN;
+        return {
+          created: created, resolved: resolved,
+          pri: c.cPriority ? (o[c.cPriority] || '').trim() : '',
+          area: c.cArea ? (o[c.cArea] || '').trim() : '',
+          type: c.cType ? (o[c.cType] || '').trim() : '',
+          frt: c.cFrt ? fdHours(o[c.cFrt]) : null,
+          res: c.cRes ? fdHours(o[c.cRes]) : null,
+          inter: isNaN(inter) ? null : inter
+        };
+      });
+    }
+
+    // Build both monthly tables from the analysis object. Returns null if there
+    // is no usable created-date column (nothing to roll up by month).
+    function fdComputeMonthly(A) {
+      var c = A.cols;
+      if (!c.cCreated) return null;
+      var recs = fdMonthlyRecords(A);
+      var createdRecs = recs.filter(function (r) { return r.created; });
+      if (!createdRecs.length) return null;
+
+      var keys = createdRecs.map(function (r) { return fdMonthKeySum(r.created); }).sort();
+      var months = fdMonthRange(keys[0], keys[keys.length - 1]);
+      if (months.length > 24) months = months.slice(months.length - 24); // keep it printable
+      var idx = {}; months.forEach(function (k, i) { idx[k] = i; });
+      var N = months.length;
+      function zeros() { return months.map(function () { return 0; }); }
+      function empties() { return months.map(function () { return []; }); }
+      var mStart = months.map(fdMonthStart), mEnd = months.map(fdMonthEnd);
+      var hasRes = !!(c.cResolved || c.cClosed);
+
+      // ── Volume ──
+      var newCreated = zeros(), resolved = zeros(), openStart = zeros(), openEnd = zeros();
+      recs.forEach(function (r) {
+        if (r.created) { var k = fdMonthKeySum(r.created); if (idx[k] != null) newCreated[idx[k]]++; }
+        if (hasRes && r.resolved) { var rk = fdMonthKeySum(r.resolved); if (idx[rk] != null) resolved[idx[rk]]++; }
+      });
+      if (hasRes) {
+        for (var i = 0; i < N; i++) {
+          var s = mStart[i], e = mEnd[i], oe = 0, os = 0;
+          for (var j = 0; j < recs.length; j++) {
+            var r = recs[j]; if (!r.created) continue;
+            if (r.created <= e && (!r.resolved || r.resolved > e)) oe++;
+            if (r.created < s && (!r.resolved || r.resolved >= s)) os++;
+          }
+          openEnd[i] = oe; openStart[i] = os;
+        }
+      }
+
+      // ── Priority (of tickets created that month) ──
+      var priSet = {};
+      createdRecs.forEach(function (r) { if (r.pri) priSet[r.pri] = true; });
+      var pris = fdPriOrder(Object.keys(priSet));
+      var priByMonth = {}; pris.forEach(function (p) { priByMonth[p] = zeros(); });
+      recs.forEach(function (r) { if (r.created && r.pri && priByMonth[r.pri]) { var k = fdMonthKeySum(r.created); if (idx[k] != null) priByMonth[r.pri][idx[k]]++; } });
+
+      // ── Categories (Area-of-Cause grouped like the dashboard; else Type) ──
+      var catByMonth = {}, catOrder = [], catBasis = null, totals = {};
+      var memberOf = {};
+      FD_AREA_GROUPS.forEach(function (g) { g.members.forEach(function (m) { memberOf[m.toLowerCase()] = g.name; }); });
+      function tallyCat(labelFn) {
+        recs.forEach(function (r) {
+          if (!r.created) return; var k = fdMonthKeySum(r.created); if (idx[k] == null) return;
+          var label = labelFn(r); if (!catByMonth[label]) catByMonth[label] = zeros();
+          catByMonth[label][idx[k]]++; totals[label] = (totals[label] || 0) + 1;
+        });
+        catOrder = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; });
+      }
+      if (c.cArea) { catBasis = 'Area of Cause'; tallyCat(function (r) { return r.area ? (memberOf[r.area.toLowerCase()] || r.area) : '(unspecified)'; }); }
+      else if (c.cType) { catBasis = 'Type'; tallyCat(function (r) { return r.type || '(unspecified)'; }); }
+      var CATLIM = 12;
+      if (catOrder.length > CATLIM) {
+        var keep = catOrder.slice(0, CATLIM), rest = catOrder.slice(CATLIM), other = zeros();
+        rest.forEach(function (lab) { var arr = catByMonth[lab]; for (var i2 = 0; i2 < N; i2++) other[i2] += arr[i2]; });
+        catByMonth['Other categories'] = other; keep.push('Other categories'); catOrder = keep;
+      }
+
+      // ── Assemble Table A (volume) ──
+      var rowsA = [];
+      if (hasRes) rowsA.push({ label: 'Total Open (start of month)', vals: openStart });
+      rowsA.push({ label: 'Total New Created', vals: newCreated });
+      if (hasRes) rowsA.push({ label: 'Total Resolved', vals: resolved });
+      if (hasRes) rowsA.push({ label: 'Total Open (end of month)', vals: openEnd });
+      pris.forEach(function (p) { rowsA.push({ label: fdTitleCase(p) + ' priority', vals: priByMonth[p] }); });
+      catOrder.forEach(function (lab) { rowsA.push({ label: lab, vals: catByMonth[lab] }); });
+
+      // ── Performance arrays (based on tickets created that month) ──
+      var frtM = empties(), resM = empties(), interM = empties(), frtPriM = {};
+      pris.forEach(function (p) { frtPriM[p] = empties(); });
+      recs.forEach(function (r) {
+        if (!r.created) return; var i = idx[fdMonthKeySum(r.created)]; if (i == null) return;
+        if (r.frt != null) frtM[i].push(r.frt);
+        if (r.res != null) resM[i].push(r.res);
+        if (r.inter != null) interM[i].push(r.inter);
+        if (r.frt != null && r.pri && frtPriM[r.pri]) frtPriM[r.pri][i].push(r.frt);
+      });
+      function medRow(arrs) { return arrs.map(function (a) { return a.length ? fdFmtHrs(fdMedian(a)) : '\u2014'; }); }
+      function meanRow(arrs) { return arrs.map(function (a) { return a.length ? fdFmtHrs(fdMean(a)) : '\u2014'; }); }
+
+      var rowsB = [];
+      if (c.cFrt) {
+        rowsB.push({ label: 'First response \u2014 median', vals: medRow(frtM) });
+        rowsB.push({ label: 'First response \u2014 average', vals: meanRow(frtM) });
+      }
+      if (c.cRes) {
+        rowsB.push({ label: 'Resolution \u2014 median', vals: medRow(resM) });
+        rowsB.push({ label: 'Resolution \u2014 average', vals: meanRow(resM) });
+      }
+      if (c.cInter) {
+        rowsB.push({
+          label: 'One-touch resolution (FCR)', vals: interM.map(function (a) {
+            if (!a.length) return '\u2014'; var ot = 0; a.forEach(function (v) { if (Math.round(v) <= 1) ot++; }); return Math.round(ot / a.length * 100) + '%';
+          })
+        });
+        rowsB.push({ label: 'Avg interactions / ticket', vals: interM.map(function (a) { return a.length ? (Math.round(fdMean(a) * 10) / 10) : '\u2014'; }) });
+      }
+      if (c.cFrt && pris.length) {
+        pris.forEach(function (p) { rowsB.push({ label: 'Avg 1st response \u2014 ' + fdTitleCase(p), vals: meanRow(frtPriM[p]) }); });
+      }
+
+      return {
+        months: months, monthLabels: months.map(fdMonthLabel), hasRes: hasRes, catBasis: catBasis,
+        rowsA: rowsA, rowsB: rowsB, pris: pris,
+        volume: { newCreated: newCreated, resolved: resolved, openEnd: openEnd, openStart: openStart },
+        catByMonth: catByMonth, catOrder: catOrder
+      };
+    }
+
+    // Auto-generated bullet observations from the monthly roll-up.
+    function fdBuildObservations(M) {
+      if (!M) return '<p style="color:var(--faint)">Load a CSV to generate observations from the data.</p>';
+      var mL = M.monthLabels, n = M.months.length, out = [];
+      var nc = M.volume.newCreated;
+      var mn = Math.min.apply(null, nc), mx = Math.max.apply(null, nc);
+      out.push('<p><b>Ticket inflow</b> ranged from ' + mn + ' to ' + mx + ' new tickets per month across ' + n + ' month' + (n > 1 ? 's' : '') + ' (' + mL[0] + (n > 1 ? (' \u2013 ' + mL[n - 1]) : '') + ').</p>');
+      if (M.hasRes && n >= 2) {
+        var r = M.volume.resolved, a = r[n - 2], b = r[n - 1];
+        var dir = b > a ? 'rose' : (b < a ? 'fell' : 'held steady');
+        out.push('<p><b>Resolution throughput</b> ' + dir + ' in ' + mL[n - 1] + ' \u2014 ' + b + ' resolved vs. ' + a + ' in ' + mL[n - 2] + '.</p>');
+        var oe = M.volume.openEnd;
+        out.push('<p><b>Open backlog</b> ended ' + mL[n - 1] + ' at ' + oe[n - 1] + ' ticket' + (oe[n - 1] === 1 ? '' : 's') + ' (from ' + oe[0] + ' at the start of the window).</p>');
+      }
+      if (M.catOrder && M.catOrder.length) {
+        var top = M.catOrder[0], arr = M.catByMonth[top];
+        var tot = arr.reduce(function (x, y) { return x + y; }, 0), trend = '';
+        if (n >= 2) { var d = arr[n - 1] - arr[0]; trend = d === 0 ? ' and was roughly flat across the window' : (d > 0 ? (' and rose from ' + arr[0] + ' to ' + arr[n - 1]) : (' and fell from ' + arr[0] + ' to ' + arr[n - 1])); }
+        out.push('<p><b>' + fdEsc(top) + '</b> was the largest category with ' + tot + ' tickets' + trend + '.</p>');
+      }
+      var fcr = M.rowsB.filter(function (x) { return x.label.indexOf('One-touch') === 0; })[0];
+      if (fcr && n >= 2) out.push('<p><b>First-contact resolution</b> moved from ' + fcr.vals[0] + ' in ' + mL[0] + ' to ' + fcr.vals[n - 1] + ' in ' + mL[n - 1] + '.</p>');
+      var frt = M.rowsB.filter(function (x) { return x.label.indexOf('First response \u2014 median') === 0; })[0];
+      if (frt && n >= 2) out.push('<p><b>First-response speed</b> was ' + frt.vals[n - 1] + ' (median) in ' + mL[n - 1] + ', vs. ' + frt.vals[0] + ' in ' + mL[0] + '.</p>');
+      return out.join('');
+    }
+
+    function fdSumRenderTable(tableEl, monthLabels, rowLabels, data, kind, corner) {
+      if (!rowLabels.length) { tableEl.innerHTML = '<tbody><tr><td class="fd-sum-empty">No rows available from this file.</td></tr></tbody>'; return; }
+      var h = '<thead><tr><th>' + fdEsc(corner) + '</th>';
+      monthLabels.forEach(function (m) { h += '<th>' + fdEsc(m) + '</th>'; });
+      h += '</tr></thead><tbody>';
+      for (var r = 0; r < rowLabels.length; r++) {
+        h += '<tr><th scope="row">' + fdEsc(rowLabels[r]) + '</th>';
+        for (var c = 0; c < monthLabels.length; c++) {
+          h += '<td contenteditable="true" data-kind="' + kind + '" data-r="' + r + '" data-c="' + c + '">' + fdEsc(data[r][c]) + '</td>';
+        }
+        h += '</tr>';
+      }
+      tableEl.innerHTML = h + '</tbody>';
+    }
+
+    function fdSumWireTable(tableEl, kind) {
+      tableEl.addEventListener('input', function (e) {
+        var td = e.target.closest('td[contenteditable]');
+        if (!td) return;
+        var r = +td.getAttribute('data-r'), c = +td.getAttribute('data-c');
+        var data = fdSumGetData(kind);
+        if (data[r]) data[r][c] = td.textContent.replace(/\s+/g, ' ').trim();
+      });
+    }
+
+    // Word-friendly inline-styled table for the .doc export.
+    function fdSumTableHTML(monthLabels, rowLabels, data, corner) {
+      if (!rowLabels.length) return '<p style="font-family:Calibri,Arial,sans-serif;">No data.</p>';
+      var s = '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%;font-family:Calibri,Arial,sans-serif;font-size:10.5pt;">';
+      s += '<tr><th style="background:#d98b3a;color:#fff;text-align:left;padding:6px 9px;border:1px solid #c07a2a;">' + fdEsc(corner) + '</th>';
+      monthLabels.forEach(function (m) { s += '<th style="background:#d98b3a;color:#fff;padding:6px 9px;border:1px solid #c07a2a;">' + fdEsc(m) + '</th>'; });
+      s += '</tr>';
+      for (var r = 0; r < rowLabels.length; r++) {
+        s += '<tr><td style="background:#e0a04a;color:#fff;font-weight:bold;padding:6px 9px;border:1px solid #c07a2a;">' + fdEsc(rowLabels[r]) + '</td>';
+        for (var c = 0; c < monthLabels.length; c++) {
+          var bg = (r % 2) ? '#fbf3e6' : '#ffffff';
+          s += '<td style="text-align:center;padding:6px 9px;border:1px solid #d9d9d9;background:' + bg + ';">' + fdEsc(data[r][c]) + '</td>';
+        }
+        s += '</tr>';
+      }
+      return s + '</table>';
+    }
+
+    function fdSumExportWord() {
+      var now = new Date();
+      var live = fdBuildLiveSummary();
+      var obsHTML = fdEl('fdSumObs').innerHTML;
+      var mL = sumMonths;
+      var labA = sumRowsA, labB = sumRowsB;
+      var h2 = 'font-family:Calibri,Arial,sans-serif;color:#2e5a4e;margin:18px 0 6px;';
+      var body =
+        '<h1 style="font-family:Calibri,Arial,sans-serif;color:#b06a12;margin:0 0 2px;">FD Analyzer &mdash; Monthly Summary &amp; Analysis</h1>' +
+        '<p style="font-family:Calibri,Arial,sans-serif;color:#777;font-size:10pt;margin:0 0 14px;">Generated ' + now.toDateString() + '</p>' +
+        '<h2 style="' + h2 + '">Written summary</h2>' +
+        '<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.5;">' + live + '</div>' +
+        '<h2 style="' + h2 + '">Tickets &mdash; monthly breakdown</h2>' +
+        fdSumTableHTML(mL, labA, sumMetrics, 'Tickets') +
+        '<h2 style="' + h2 + '">Helpdesk performance</h2>' +
+        fdSumTableHTML(mL, labB, sumPerf, 'Performance') +
+        '<h2 style="' + h2 + '">Key observations</h2>' +
+        '<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.5;">' + obsHTML + '</div>';
+      var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
+        '<head><meta charset="utf-8"><title>FD Analyzer Summary</title></head><body>' + body + '</body></html>';
+      var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+      var url = URL.createObjectURL(blob);
+      var stamp = now.toISOString().slice(0, 10);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'FD-Monthly-Summary-' + stamp + '.doc';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    }
+
+    function fdOpenSummary() {
+      var A = fdCurrent;
+      fdEl('fdSumLede').innerHTML = fdBuildLiveSummary();
+      fdEl('fdSumPrintDate').textContent = 'Generated ' + new Date().toDateString();
+
+      var M = A ? fdComputeMonthly(A) : null;
+      sumHasData = !!M;
+      if (!M) {
+        sumMonths = []; sumRowsA = []; sumRowsB = []; sumMetrics = []; sumPerf = [];
+        var note = A
+          ? 'This file has no recognisable created-date column, so a per-month breakdown can\u2019t be built. Load an export that includes a "Created time" column.'
+          : 'Load a Freshdesk CSV on the report page first \u2014 these tables are generated from it.';
+        fdEl('fdSumMetrics').innerHTML = '<tbody><tr><td class="fd-sum-empty">' + note + '</td></tr></tbody>';
+        fdEl('fdSumPerf').innerHTML = '<tbody><tr><td class="fd-sum-empty">' + note + '</td></tr></tbody>';
+        fdEl('fdSumMetricsCap').textContent = '';
+        fdEl('fdSumPerfCap').textContent = '';
+        fdEl('fdSumObs').innerHTML = fdBuildObservations(null);
+        return true;
+      }
+
+      sumMonths = M.monthLabels;
+      sumRowsA = M.rowsA.map(function (r) { return r.label; });
+      sumRowsB = M.rowsB.map(function (r) { return r.label; });
+      sumMetrics = M.rowsA.map(function (r) { return r.vals.map(String); });
+      sumPerf = M.rowsB.map(function (r) { return r.vals.map(String); });
+
+      fdSumRenderTable(fdEl('fdSumMetrics'), sumMonths, sumRowsA, sumMetrics, 'metrics', 'Tickets');
+      fdSumRenderTable(fdEl('fdSumPerf'), sumMonths, sumRowsB, sumPerf, 'perf', 'Performance');
+      fdEl('fdSumMetricsCap').textContent = 'Volume, priority mix and categories by month' + (M.catBasis ? (' \u00b7 categories from "' + M.catBasis + '"') : '') + '.';
+      fdEl('fdSumPerfCap').textContent = 'Response, resolution and interaction metrics for tickets created each month.';
+      fdEl('fdSumObs').innerHTML = fdBuildObservations(M);
+      return true;
+    }
+    window.fdOpenSummary = fdOpenSummary;
+
+    // Wiring
+    fdSumWireTable(fdEl('fdSumMetrics'), 'metrics');
+    fdSumWireTable(fdEl('fdSumPerf'), 'perf');
+    fdEl('fdSummaryBtn').addEventListener('click', function () { if (fdOpenSummary()) window.fdShowView('fd-summary'); });
+    fdEl('fdSumPrintBtn').addEventListener('click', function () { window.print(); });
+    fdEl('fdSumWordBtn').addEventListener('click', fdSumExportWord);
+    fdEl('fdSumResetBtn').addEventListener('click', function () { fdOpenSummary(); });
   })();
 
 
@@ -6414,6 +6916,40 @@
     })();
   })();
 
+  // ─── PWA: service worker registration + "Install App" prompt ─────────────
+  (function () {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("sw.js").catch(function (err) {
+          console.warn("Service worker registration failed:", err);
+        });
+      });
+    }
+
+    // Chrome/Edge/Android fire this instead of auto-showing their install UI,
+    // so we can offer our own "Install App" button in the sidebar.
+    var deferredPrompt = null;
+    var installBtn = document.getElementById("pwaInstallBtn");
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.classList.remove("hidden");
+    });
+    if (installBtn) {
+      installBtn.addEventListener("click", function () {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.finally(function () {
+          deferredPrompt = null;
+          installBtn.classList.add("hidden");
+        });
+      });
+    }
+    window.addEventListener("appinstalled", function () {
+      if (installBtn) installBtn.classList.add("hidden");
+      deferredPrompt = null;
+    });
+  })();
 
 </script>
 </body>
