@@ -248,6 +248,33 @@
   .fab-icon-btn:active { transform: translateY(0) scale(.94); }
   .fab-icon-btn svg { width: 20px; height: 20px; stroke: currentColor; display: block; }
 
+  /* Tools floating collapsible menu */
+  .tools-menu-wrap { position: relative; display: flex; align-items: center; }
+  .fab-icon-btn.open { background: var(--pine); border-color: var(--pine); color: #fff; }
+  .fab-icon-btn.open svg { stroke: #fff; }
+  .tools-menu {
+    position: absolute; bottom: calc(100% + 12px); left: 0; transform: translateY(6px) scale(.97);
+    transform-origin: bottom left; width: min(232px, calc(100vw - 32px)); max-height: min(66vh, 520px); overflow-y: auto;
+    background: var(--surface); border: 1px solid var(--border-strong); border-radius: 16px;
+    box-shadow: 0 18px 44px rgba(27,36,32,.26); padding: 8px; z-index: 90;
+    opacity: 0; pointer-events: none; transition: opacity .15s ease, transform .15s ease;
+  }
+  .tools-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+  .tools-menu[hidden] { display: none; }
+  .tools-menu-cap { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); padding: 6px 10px 8px; }
+  .tools-item {
+    width: 100%; display: flex; align-items: center; gap: 11px; padding: 10px 12px; margin: 1px 0;
+    border-radius: 10px; background: transparent; color: var(--ink); font-size: 14.5px; font-weight: 500; text-align: left; cursor: pointer;
+  }
+  .tools-item:hover { background: var(--bg); }
+  .tools-item.active { background: var(--pine); color: #fff; }
+  .tools-item.active .nav-ic { color: #fff; }
+  .tools-item.active .nav-ic svg { stroke: #fff; }
+  .tools-item .nav-ic { flex: none; width: 22px; height: 22px; display: grid; place-items: center; color: var(--muted); }
+  .tools-item .nav-ic svg { width: 19px; height: 19px; }
+  .tools-item .nav-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tools-sep { height: 1px; background: var(--border); margin: 6px 4px; }
+
   .scrim { display: none; }
 
   /* Counters column (right, anchored, collapsible) */
@@ -1031,53 +1058,6 @@
         <span class="nav-label">New list</span>
       </button>
     </nav>
-    <div class="side-foot">
-      <button class="nav-item" id="navJsonTool">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 13h.01"/><path d="M12 13h4"/><path d="M8 17h.01"/><path d="M12 17h4"/></svg>
-        </span>
-        <span class="nav-label">JSON Tool</span>
-      </button>
-      <button class="nav-item" id="navFreshdesk">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/></svg>
-        </span>
-        <span class="nav-label">FreshDesk</span>
-      </button>
-      <button class="nav-item" id="navJira">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
-        </span>
-        <span class="nav-label">JIRA Dashboard</span>
-      </button>
-      <button class="nav-item" id="navTwilio">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
-        </span>
-        <span class="nav-label">Twilio</span>
-      </button>
-      <button class="nav-item" id="navMarkdownViewer">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 15h2l2-3 2 5 2-3h2"/></svg>
-        </span>
-        <span class="nav-label">Markdown Viewer</span>
-      </button>
-      <button class="nav-item" id="navWorldClock">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        </span>
-        <span class="nav-label">World Clock</span>
-      </button>
-      <button class="nav-item hidden" id="pwaInstallBtn" type="button" title="Install Busy Bee as an app on this device">
-        <span class="nav-ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-        </span>
-        <span class="nav-label">Install App</span>
-      </button>
-      <button class="nav-item" id="openBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></span><span class="nav-label">Open file</span></button>
-      <button class="nav-item" id="saveBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 3v5h7"/><path d="M12 17v-5"/><path d="m9 14 3 3 3-3"/></svg></span><span class="nav-label">Save backup</span></button>
-      <button class="nav-item" id="csvBtn"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v8"/></svg></span><span class="nav-label">Export CSV</span></button>
-    </div>
   </aside>
 
   <div class="main">
@@ -1832,6 +1812,46 @@
 </div>
 
 <div class="fab-row">
+  <div class="tools-menu-wrap" id="toolsMenuWrap">
+    <div class="tools-menu" id="toolsMenu" role="menu" aria-label="Tools" hidden>
+      <div class="tools-menu-cap">Tools</div>
+      <button class="tools-item" id="navJsonTool" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 13h.01"/><path d="M12 13h4"/><path d="M8 17h.01"/><path d="M12 17h4"/></svg></span>
+        <span class="nav-label">JSON Tool</span>
+      </button>
+      <button class="tools-item" id="navFreshdesk" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/></svg></span>
+        <span class="nav-label">FreshDesk</span>
+      </button>
+      <button class="tools-item" id="navJira" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span class="nav-label">JIRA Dashboard</span>
+      </button>
+      <button class="tools-item" id="navTwilio" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
+        <span class="nav-label">Twilio</span>
+      </button>
+      <button class="tools-item" id="navMarkdownViewer" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 15h2l2-3 2 5 2-3h2"/></svg></span>
+        <span class="nav-label">Markdown Viewer</span>
+      </button>
+      <button class="tools-item" id="navWorldClock" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
+        <span class="nav-label">World Clock</span>
+      </button>
+      <div class="tools-sep"></div>
+      <button class="tools-item hidden" id="pwaInstallBtn" type="button" role="menuitem" title="Install Busy Bee as an app on this device">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
+        <span class="nav-label">Install App</span>
+      </button>
+      <button class="tools-item" id="openBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></span><span class="nav-label">Open file</span></button>
+      <button class="tools-item" id="saveBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 3v5h7"/><path d="M12 17v-5"/><path d="m9 14 3 3 3-3"/></svg></span><span class="nav-label">Save backup</span></button>
+      <button class="tools-item" id="csvBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v8"/></svg></span><span class="nav-label">Export CSV</span></button>
+    </div>
+    <button class="fab-icon-btn" id="toolsFabBtn" type="button" title="Tools" aria-label="Tools" aria-haspopup="true" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6Z"/></svg>
+    </button>
+  </div>
   <button class="fab-icon-btn" id="themeFabBtn" type="button" title="Toggle dark / light mode" aria-label="Toggle dark or light mode">
     <span id="themeIc"></span>
   </button>
@@ -3755,6 +3775,36 @@
     applyTheme(next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
   });
+
+  // Tools floating collapsible menu
+  (function () {
+    var wrap = $("toolsMenuWrap"), menu = $("toolsMenu"), btn = $("toolsFabBtn");
+    if (!wrap || !menu || !btn) return;
+    function openMenu() {
+      menu.hidden = false;
+      requestAnimationFrame(function () { menu.classList.add("open"); });
+      btn.classList.add("open"); btn.setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      menu.classList.remove("open");
+      btn.classList.remove("open"); btn.setAttribute("aria-expanded", "false");
+      setTimeout(function () { if (!menu.classList.contains("open")) menu.hidden = true; }, 180);
+    }
+    function isOpen() { return menu.classList.contains("open"); }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (isOpen()) closeMenu(); else openMenu();
+    });
+    menu.addEventListener("click", function (e) {
+      if (e.target.closest(".tools-item")) closeMenu();
+    });
+    document.addEventListener("click", function (e) {
+      if (isOpen() && !wrap.contains(e.target)) closeMenu();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && isOpen()) closeMenu();
+    });
+  })();
 
   $("delConfirm").addEventListener("input", function () {
     $("confirmDeleteBtn").disabled = $("delConfirm").value.trim().toLowerCase() !== "delete";
