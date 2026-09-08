@@ -95,6 +95,9 @@
   .hl-mode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .hl-mode-btn.active svg { stroke: #fff; }
   .save-btn { display: inline-flex; align-items: center; gap: 5px; }
+  .clear-btn { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); }
+  .clear-btn:hover { border-color: #d9534f; color: #d9534f; }
+  .clear-btn:hover svg { stroke: #d9534f; }
   .save-btn.dirty { border-color: var(--accent); color: var(--accent); font-weight: 600; }
   .save-btn.dirty svg { stroke: var(--accent); }
 
@@ -254,6 +257,10 @@
   </button>
   <label class="file-btn" for="fileInput">Open .md file</label>
   <input type="file" id="fileInput" accept=".md,.markdown,.txt">
+  <button id="clearBtn" class="clear-btn" title="Close the current file (your saved highlights are kept for next time)" hidden>
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    Clear
+  </button>
   <button id="themeToggle">Dark mode</button>
 </div>
 <div class="hl-hint" id="hlHint"></div>
@@ -282,6 +289,7 @@
   const hlBtn = document.getElementById('hlBtn');
   const eraseBtn = document.getElementById('eraseBtn');
   const saveBtn = document.getElementById('saveBtn');
+  const clearBtn = document.getElementById('clearBtn');
   const hlHint = document.getElementById('hlHint');
   const hlColorsWrap = document.getElementById('hlColors');
 
@@ -519,6 +527,7 @@
     applyHighlights();
     hlTools.hidden = false;
     saveBtn.hidden = false;
+    clearBtn.hidden = false;
     markDirty(false);
     if (highlights.length) flashHint(highlights.length + ' saved highlight' + (highlights.length === 1 ? '' : 's') + ' loaded for "' + currentFileName + '".');
   }
@@ -622,6 +631,24 @@
       ? 'Saved ' + highlights.length + ' highlight' + (highlights.length === 1 ? '' : 's') + ' for "' + currentFileName + '". They\'ll auto-load next time you open this file.'
       : 'Highlights cleared for "' + currentFileName + '".');
   });
+
+  // Close the currently loaded file and return to the empty drop-zone state.
+  // Saved highlights for this filename stay in storage, so re-opening the file restores them.
+  function clearFile() {
+    if (mode) setMode(mode); // toggles the active mode off, clears body classes + hint
+    content.innerHTML = '';
+    toc.innerHTML = '<div class="toc-empty">Headings will appear here</div>';
+    highlights = [];
+    currentFileName = null;
+    dirty = false;
+    filenameEl.textContent = 'No file loaded';
+    dropzone.style.display = '';
+    hlTools.hidden = true;
+    saveBtn.hidden = true;
+    clearBtn.hidden = true;
+    hideHint();
+  }
+  clearBtn.addEventListener('click', clearFile);
 
   // Scroll spy for TOC active state
   window.addEventListener('scroll', () => {

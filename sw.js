@@ -13,7 +13,7 @@
  * to pick up the new copies (old caches are cleaned up automatically on activate).
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = "busybee-" + CACHE_VERSION;
 
 // Same-origin app shell — the three pages plus their installable assets.
