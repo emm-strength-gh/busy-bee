@@ -267,6 +267,9 @@
     border-radius: 10px; background: transparent; color: var(--ink); font-size: 14.5px; font-weight: 500; text-align: left; cursor: pointer;
   }
   .tools-item:hover { background: var(--bg); }
+  .tools-item-danger { color: var(--clay); }
+  .tools-item-danger .nav-ic { color: var(--clay); }
+  .tools-item-danger:hover { background: var(--clay-soft); }
   .tools-item.active { background: var(--pine); color: #fff; }
   .tools-item.active .nav-ic { color: #fff; }
   .tools-item.active .nav-ic svg { stroke: #fff; }
@@ -1847,6 +1850,7 @@
       <button class="tools-item" id="openBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M12 18v-6"/><path d="m9 15 3-3 3 3"/></svg></span><span class="nav-label">Open file</span></button>
       <button class="tools-item" id="saveBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M8 3v5h7"/><path d="M12 17v-5"/><path d="m9 14 3 3 3-3"/></svg></span><span class="nav-label">Save backup</span></button>
       <button class="tools-item" id="csvBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h8"/><path d="M12 13v8"/></svg></span><span class="nav-label">Export CSV</span></button>
+      <button class="tools-item tools-item-danger" id="clearDataBtn" role="menuitem"><span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></span><span class="nav-label">Clear all data</span></button>
     </div>
     <button class="fab-icon-btn" id="toolsFabBtn" type="button" title="Tools" aria-label="Tools" aria-haspopup="true" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6Z"/></svg>
@@ -1914,6 +1918,21 @@
     <div class="modal-actions">
       <button class="btn-ghost" data-close>Cancel</button>
       <button class="btn-solid danger" id="confirmDeleteBtn" disabled>Delete list</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clear all data modal -->
+<div class="modal-overlay" id="clearModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+    <h3 id="clearTitle">Clear all data</h3>
+    <p class="modal-sub">This removes <b>all your lists and items</b> from this app and empties the saved session, resetting to the two starter lists. This can’t be undone — if you want to keep your data, use <b>Save backup</b> first.</p>
+    <label for="clearConfirm">Type <b>clear</b> to confirm</label>
+    <input id="clearConfirm" type="text" placeholder="clear" autocomplete="off" />
+    <p class="modal-error" id="clearError"></p>
+    <div class="modal-actions">
+      <button class="btn-ghost" data-close>Cancel</button>
+      <button class="btn-solid danger" id="confirmClearBtn" disabled>Clear all data</button>
     </div>
   </div>
 </div>
@@ -2172,6 +2191,27 @@
   }
   function flushSaveNow() { clearTimeout(saveTimer); saveTimer = null; persistNow(); }
 
+  function load() {
+    // Clean up anything left by long-retired storage formats — only STORE_KEY is current.
+    [LEGACY_V3, LEGACY_V2, LEGACY_V1].forEach(function (k) {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+    var raw = null;
+    try { raw = localStorage.getItem(STORE_KEY); } catch (e) {}
+    if (raw) {
+      try {
+        var saved = JSON.parse(raw);
+        var rawLists = Array.isArray(saved) ? saved : (saved && Array.isArray(saved.lists) ? saved.lists : null);
+        if (rawLists) {
+          DATA.lists = hydrateLists(rawLists);
+          ensureBuiltins();
+          return;
+        }
+      } catch (e) { /* corrupted save — fall through to a fresh start below */ }
+    }
+    DATA.lists = seedBuiltins();
+  }
+
   // Build a serializable snapshot; locked lists are encrypted (never plaintext).
   function buildSnapshot() {
     var chain = Promise.resolve();
@@ -2217,26 +2257,6 @@
       });
       if (done) done();
     });
-  }
-  function load() {
-    // Clean up anything left by long-retired storage formats — only STORE_KEY is current.
-    [LEGACY_V3, LEGACY_V2, LEGACY_V1].forEach(function (k) {
-      try { localStorage.removeItem(k); } catch (e) {}
-    });
-    var raw = null;
-    try { raw = localStorage.getItem(STORE_KEY); } catch (e) {}
-    if (raw) {
-      try {
-        var saved = JSON.parse(raw);
-        var rawLists = Array.isArray(saved) ? saved : (saved && Array.isArray(saved.lists) ? saved.lists : null);
-        if (rawLists) {
-          DATA.lists = hydrateLists(rawLists);
-          ensureBuiltins();
-          return;
-        }
-      } catch (e) { /* corrupted save — fall through to a fresh start below */ }
-    }
-    DATA.lists = seedBuiltins();
   }
 
   var toastTimer;
@@ -2376,6 +2396,17 @@
     dirty = false; persistNow(); renderHome(); renderCounters();
     var items = DATA.lists.reduce(function (a, l) { return a + l.items.length; }, 0);
     toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + ".");
+  }
+  // Wipe all lists/items and the saved session, resetting to the two starter lists.
+  // (Persisted so it survives reload — the point is a clean slate, not just an in-memory reset.)
+  function clearData() {
+    DATA.lists = seedBuiltins();
+    selected = {}; currentListId = null; unlocked = {}; sessionKey = {};
+    resetDailies();
+    dirty = false; persistNow();
+    show("overview");
+    renderHome(); renderCounters();
+    toast("All data cleared. Starting fresh.");
   }
   // Route an opened file by extension/content (.json -> JSON, otherwise CSV).
   function importFile(name, text) {
@@ -3675,6 +3706,19 @@
   $("openBtn").addEventListener("click", openFile);
   $("saveBtn").addEventListener("click", saveFile);
   $("csvBtn").addEventListener("click", exportCSV);
+  function openClearModal() { $("clearConfirm").value = ""; $("confirmClearBtn").disabled = true; $("clearError").textContent = ""; openModal("clearModal"); setTimeout(function () { $("clearConfirm").focus(); }, 40); }
+  function submitClearData() {
+    if ($("clearConfirm").value.trim().toLowerCase() !== "clear") { $("clearError").textContent = 'Type "clear" to confirm.'; return; }
+    closeModal("clearModal");
+    clearData();
+  }
+  $("clearDataBtn").addEventListener("click", openClearModal);
+  $("clearConfirm").addEventListener("input", function () {
+    $("confirmClearBtn").disabled = $("clearConfirm").value.trim().toLowerCase() !== "clear";
+    $("clearError").textContent = "";
+  });
+  $("clearConfirm").addEventListener("keydown", function (e) { if (e.key === "Enter" && !$("confirmClearBtn").disabled) { e.preventDefault(); submitClearData(); } });
+  $("confirmClearBtn").addEventListener("click", submitClearData);
   $("fileInput").addEventListener("change", function (e) {
     var file = e.target.files && e.target.files[0]; if (!file) return;
     var reader = new FileReader(); reader.onload = function () { importFile(file.name, String(reader.result)); };
@@ -3782,6 +3826,7 @@
     if (!wrap || !menu || !btn) return;
     function openMenu() {
       menu.hidden = false;
+      // next frame so the transition runs from the hidden state
       requestAnimationFrame(function () { menu.classList.add("open"); });
       btn.classList.add("open"); btn.setAttribute("aria-expanded", "true");
     }
@@ -3795,12 +3840,16 @@
       e.stopPropagation();
       if (isOpen()) closeMenu(); else openMenu();
     });
+    // Any tool button inside closes the menu (their own handlers still run — this is a
+    // separate listener, and the menu buttons keep their original IDs/handlers).
     menu.addEventListener("click", function (e) {
       if (e.target.closest(".tools-item")) closeMenu();
     });
+    // Click outside closes it.
     document.addEventListener("click", function (e) {
       if (isOpen() && !wrap.contains(e.target)) closeMenu();
     });
+    // Escape closes it.
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && isOpen()) closeMenu();
     });
