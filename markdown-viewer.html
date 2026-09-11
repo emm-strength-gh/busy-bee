@@ -94,12 +94,19 @@
   .hl-mode-btn { display: inline-flex; align-items: center; gap: 5px; }
   .hl-mode-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .hl-mode-btn.active svg { stroke: #fff; }
-  .save-btn { display: inline-flex; align-items: center; gap: 5px; }
   .clear-btn { display: inline-flex; align-items: center; gap: 5px; color: var(--text-secondary); }
   .clear-btn:hover { border-color: #d9534f; color: #d9534f; }
   .clear-btn:hover svg { stroke: #d9534f; }
-  .save-btn.dirty { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  .save-btn.dirty svg { stroke: var(--accent); }
+
+  /* Toolbar container: on desktop this is just an inline row (unchanged appearance).
+     On narrow screens it becomes a dropdown panel opened by .menu-toggle. */
+  .toolbar-panel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toolbar-sep { width: 1px; align-self: stretch; background: var(--border); margin: 2px 0; }
+  #hlTools[hidden] + .toolbar-sep { display: none; }
+  .menu-toggle {
+    display: none; align-items: center; justify-content: center;
+    width: 34px; height: 34px; padding: 0; border-radius: 9px; flex: none;
+  }
 
   /* Highlight marks + interaction cursors */
   #content mark.hl { border-radius: 3px; padding: .05em 0; color: inherit; background-color: var(--hl-fallback, #ffe066); }
@@ -226,6 +233,27 @@
     .toc { display: none; }
     main { padding: 24px 20px 80px; }
     .topbar h1 { display: none; }
+    .filename { flex: 1 1 auto; }
+
+    .menu-toggle { display: inline-flex; }
+    .toolbar-panel {
+      position: absolute; top: 100%; right: 12px; margin-top: 8px;
+      display: none; flex-direction: column; align-items: stretch; gap: 10px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+      box-shadow: 0 14px 36px var(--shadow); padding: 12px;
+      min-width: 230px; max-width: calc(100vw - 24px); z-index: 30;
+    }
+    .toolbar-panel.open { display: flex; }
+    .toolbar-panel .hl-tools { flex-direction: column; align-items: stretch; gap: 8px; }
+    .toolbar-panel .hl-colors {
+      justify-content: center; border-right: none; margin-right: 0; padding-right: 0;
+      padding-bottom: 9px; border-bottom: 1px solid var(--border);
+    }
+    .toolbar-panel .hl-mode-btn,
+    .toolbar-panel .file-btn,
+    .toolbar-panel .clear-btn,
+    .toolbar-panel #themeToggle { width: 100%; justify-content: center; }
+    .toolbar-sep { width: auto; height: 1px; align-self: stretch; margin: 0; }
   }
 </style>
 </head>
@@ -234,34 +262,36 @@
 <div class="topbar">
   <h1>Markdown Viewer</h1>
   <span class="filename" id="filename">No file loaded</span>
-  <div class="hl-tools" id="hlTools" hidden>
-    <div class="hl-colors" id="hlColors">
-      <button class="hl-swatch active" data-color="yellow" style="--sw:#ffe066" title="Yellow highlighter" aria-label="Yellow highlighter"></button>
-      <button class="hl-swatch" data-color="green" style="--sw:#a7e0a0" title="Green highlighter" aria-label="Green highlighter"></button>
-      <button class="hl-swatch" data-color="blue" style="--sw:#9cd0f5" title="Blue highlighter" aria-label="Blue highlighter"></button>
-      <button class="hl-swatch" data-color="pink" style="--sw:#f6a9c9" title="Pink highlighter" aria-label="Pink highlighter"></button>
-      <button class="hl-swatch" data-color="orange" style="--sw:#ffc078" title="Orange highlighter" aria-label="Orange highlighter"></button>
+  <button class="menu-toggle" id="menuToggle" aria-label="Tools menu" aria-expanded="false" aria-haspopup="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+  </button>
+  <div class="toolbar-panel" id="toolbarPanel">
+    <div class="hl-tools" id="hlTools" hidden>
+      <div class="hl-colors" id="hlColors">
+        <button class="hl-swatch active" data-color="yellow" style="--sw:#ffe066" title="Yellow highlighter" aria-label="Yellow highlighter"></button>
+        <button class="hl-swatch" data-color="green" style="--sw:#a7e0a0" title="Green highlighter" aria-label="Green highlighter"></button>
+        <button class="hl-swatch" data-color="blue" style="--sw:#9cd0f5" title="Blue highlighter" aria-label="Blue highlighter"></button>
+        <button class="hl-swatch" data-color="pink" style="--sw:#f6a9c9" title="Pink highlighter" aria-label="Pink highlighter"></button>
+        <button class="hl-swatch" data-color="orange" style="--sw:#ffc078" title="Orange highlighter" aria-label="Orange highlighter"></button>
+      </div>
+      <button id="hlBtn" class="hl-mode-btn" title="Highlighter — select text to highlight" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h3l6-6"/><path d="m14 6 4 4"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L13 14l-4 1 1-4 8.5-8.5Z"/></svg>
+        Highlight
+      </button>
+      <button id="eraseBtn" class="hl-mode-btn" title="Eraser — click or drag over a highlight to remove it" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4-4a2 2 0 0 1 0-2.8l9.6-9.6a2 2 0 0 1 2.8 0l4.8 4.8a2 2 0 0 1 0 2.8L13 21"/><path d="M22 21H7"/><path d="m5 11 6 6"/></svg>
+        Erase
+      </button>
     </div>
-    <button id="hlBtn" class="hl-mode-btn" title="Highlighter — select text to highlight" aria-pressed="false">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11-6 6v3h3l6-6"/><path d="m14 6 4 4"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L13 14l-4 1 1-4 8.5-8.5Z"/></svg>
-      Highlight
+    <div class="toolbar-sep" aria-hidden="true"></div>
+    <label class="file-btn" for="fileInput">Open .md file</label>
+    <input type="file" id="fileInput" accept=".md,.markdown,.txt">
+    <button id="clearBtn" class="clear-btn" title="Close the current file (your saved highlights are kept for next time)" hidden>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      Clear
     </button>
-    <button id="eraseBtn" class="hl-mode-btn" title="Eraser — click or drag over a highlight to remove it" aria-pressed="false">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4-4a2 2 0 0 1 0-2.8l9.6-9.6a2 2 0 0 1 2.8 0l4.8 4.8a2 2 0 0 1 0 2.8L13 21"/><path d="M22 21H7"/><path d="m5 11 6 6"/></svg>
-      Erase
-    </button>
+    <button id="themeToggle">Dark mode</button>
   </div>
-  <button id="saveBtn" class="save-btn" title="Save highlights for this file (auto-loads next time you open it)" hidden>
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
-    Save File
-  </button>
-  <label class="file-btn" for="fileInput">Open .md file</label>
-  <input type="file" id="fileInput" accept=".md,.markdown,.txt">
-  <button id="clearBtn" class="clear-btn" title="Close the current file (your saved highlights are kept for next time)" hidden>
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-    Clear
-  </button>
-  <button id="themeToggle">Dark mode</button>
 </div>
 <div class="hl-hint" id="hlHint"></div>
 
@@ -288,10 +318,11 @@
   const hlTools = document.getElementById('hlTools');
   const hlBtn = document.getElementById('hlBtn');
   const eraseBtn = document.getElementById('eraseBtn');
-  const saveBtn = document.getElementById('saveBtn');
   const clearBtn = document.getElementById('clearBtn');
   const hlHint = document.getElementById('hlHint');
   const hlColorsWrap = document.getElementById('hlColors');
+  const menuToggle = document.getElementById('menuToggle');
+  const toolbarPanel = document.getElementById('toolbarPanel');
 
   // ---------- Highlight state ----------
   const HL_PREFIX = 'mdv-highlights::v1::';
@@ -299,7 +330,6 @@
   let highlights = [];          // [{block, start, end, color}] — char offsets within a block
   let currentColor = 'yellow';
   let mode = null;              // null | 'highlight' | 'erase'
-  let dirty = false;            // unsaved highlight changes
 
   marked.setOptions({
     breaks: true,
@@ -331,15 +361,22 @@
       if (highlights.length) localStorage.setItem(storageKey(currentFileName), JSON.stringify(highlights));
       else localStorage.removeItem(storageKey(currentFileName));
     } catch (e) {}
+    // Tell the parent Busy Bee app so it can fold these into its single JSON backup — this
+    // path also covers the case where the iframe doesn't share the parent's localStorage.
+    notifyParent();
+  }
+  function notifyParent() {
+    if (!currentFileName) return;
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'mdv-highlights-changed', name: currentFileName, highlights: highlights }, '*');
+      }
+    } catch (e) {}
   }
 
-  function markDirty(v) {
-    dirty = v;
-    saveBtn.classList.toggle('dirty', v);
-    saveBtn.textContent = '';
-    const svg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>';
-    saveBtn.innerHTML = svg + (v ? ' Save File •' : ' Save File');
-  }
+  // Highlights auto-persist to localStorage on every change (which the main Busy Bee app
+  // folds into its single JSON "Save backup"), so there's no separate Save button here.
+  function markDirty() {}
 
   // The block elements highlights are indexed against: direct children of #content.
   function contentBlocks() { return Array.from(content.children); }
@@ -525,8 +562,10 @@
     // Load + apply any saved highlights for this filename.
     highlights = loadStoredHighlights(currentFileName);
     applyHighlights();
+    // Also ask the parent app for its mirrored copy, in case our storage isn't shared with it
+    // (file://). It will postMessage the data back and we'll re-apply.
+    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'mdv-ready' }, '*'); } catch (e) {}
     hlTools.hidden = false;
-    saveBtn.hidden = false;
     clearBtn.hidden = false;
     markDirty(false);
     if (highlights.length) flashHint(highlights.length + ' saved highlight' + (highlights.length === 1 ? '' : 's') + ' loaded for "' + currentFileName + '".');
@@ -624,13 +663,45 @@
     if (m) { e.preventDefault(); eraseAt(m); }
   });
 
-  saveBtn.addEventListener('click', () => {
-    persistHighlights();
-    markDirty(false);
-    flashHint(highlights.length
-      ? 'Saved ' + highlights.length + ' highlight' + (highlights.length === 1 ? '' : 's') + ' for "' + currentFileName + '". They\'ll auto-load next time you open this file.'
-      : 'Highlights cleared for "' + currentFileName + '".');
+  // Messages from the parent Busy Bee app.
+  window.addEventListener('message', (e) => {
+    const d = e && e.data;
+    if (!d || typeof d !== 'object') return;
+    if (d.type === 'mdv-restore-highlights') {
+      // The app restored a backup (or is handing us its mirror on startup). Write the
+      // highlight data into OUR localStorage — this is what makes restore work even when the
+      // iframe has a separate origin (file://) and doesn't share the parent's storage.
+      try {
+        if (d.replace) {
+          const rm = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.indexOf(HL_PREFIX) === 0) rm.push(k);
+          }
+          rm.forEach(k => localStorage.removeItem(k));
+        }
+        if (d.map && typeof d.map === 'object') {
+          Object.keys(d.map).forEach(name => {
+            if (Array.isArray(d.map[name]) && d.map[name].length) localStorage.setItem(HL_PREFIX + name, JSON.stringify(d.map[name]));
+          });
+        }
+      } catch (err) {}
+      // If a file is open, refresh its highlights from the just-updated storage.
+      if (currentFileName) {
+        highlights = loadStoredHighlights(currentFileName);
+        reflow();
+        if (highlights.length) flashHint(highlights.length + ' highlight' + (highlights.length === 1 ? '' : 's') + ' restored from your backup.');
+      }
+    } else if (d.type === 'mdv-reload-highlights' && currentFileName) {
+      // Legacy/shared-storage path: just re-read our storage.
+      highlights = loadStoredHighlights(currentFileName);
+      reflow();
+    }
   });
+
+  // Let the parent app know we're loaded so it can hand us any restored highlight data
+  // (covers the case where the iframe loads lazily, after a backup was already opened).
+  try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'mdv-ready' }, '*'); } catch (e) {}
 
   // Close the currently loaded file and return to the empty drop-zone state.
   // Saved highlights for this filename stay in storage, so re-opening the file restores them.
@@ -640,15 +711,38 @@
     toc.innerHTML = '<div class="toc-empty">Headings will appear here</div>';
     highlights = [];
     currentFileName = null;
-    dirty = false;
     filenameEl.textContent = 'No file loaded';
     dropzone.style.display = '';
     hlTools.hidden = true;
-    saveBtn.hidden = true;
     clearBtn.hidden = true;
     hideHint();
   }
   clearBtn.addEventListener('click', clearFile);
+
+  // ---------- Mobile "Tools" dropdown ----------
+  // On desktop .toolbar-panel is just an inline row (menuToggle is display:none there, so
+  // these handlers are inert). On narrow screens it becomes a floating dropdown.
+  function openMenu() {
+    toolbarPanel.classList.add('open');
+    menuToggle.setAttribute('aria-expanded', 'true');
+  }
+  function closeMenu() {
+    toolbarPanel.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  }
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toolbarPanel.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  // Any action inside the panel closes it afterward, so the next tap lands on the document
+  // (e.g. picking a highlight color, then immediately selecting text to highlight).
+  toolbarPanel.addEventListener('click', (e) => {
+    if (e.target.closest('button, label')) setTimeout(closeMenu, 0);
+  });
+  document.addEventListener('click', (e) => {
+    if (toolbarPanel.classList.contains('open') && !toolbarPanel.contains(e.target) && e.target !== menuToggle) closeMenu();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 
   // Scroll spy for TOC active state
   window.addEventListener('scroll', () => {

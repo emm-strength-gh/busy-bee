@@ -750,14 +750,22 @@
   function refreshAllWeather(){ nodes.forEach(fetchWeather); }
 
   syncControls();
-  paint(true);
-  setInterval(function(){ paint(false); }, 200);
+  // A thrown error inside paint() would kill the setInterval and freeze the clock forever.
+  // Wrap it so one bad tick can never stop the ticking; also force a full re-render once per
+  // second as a backup in case the 200ms sampler ever misses the second boundary.
+  function safePaint(force){
+    try { paint(force); }
+    catch(e){ try { console.warn("world-clock paint error:", e); } catch(_){} }
+  }
+  safePaint(true);
+  setInterval(function(){ safePaint(false); }, 200);
+  setInterval(function(){ safePaint(true); }, 1000);
   setInterval(sync, 10 * 60 * 1000);
   sync();
   refreshAllWeather();
   setInterval(refreshAllWeather, WX_REFRESH_MS);
   document.getElementById("btnSync").addEventListener("click", refreshAllWeather);
-  document.addEventListener("visibilitychange", function(){ if(!document.hidden) { sync(); refreshAllWeather(); } });
+  document.addEventListener("visibilitychange", function(){ if(!document.hidden) { safePaint(true); sync(); refreshAllWeather(); } });
 
   window.__wc = { paint: paint, cfg: cfg, nodes: nodes, skyFor: skyFor, tzOffsetMinutes: tzOffsetMinutes };
 })();
