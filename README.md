@@ -135,7 +135,7 @@ Browser storage can be cleared (private browsing, clearing site data, a new devi
 1. Edit `index.html` (or the other files).
 2. Bump the version at the top of `sw.js` so browsers drop the old cache:
    ```js
-   const CACHE_VERSION = "v11"; // was "v10"
+   const CACHE_VERSION = "v12"; // was "v11"
    ```
 3. Upload/commit with a message describing what changed, then push. Visitors get the new
    version on their next visit or app relaunch.

@@ -4119,7 +4119,7 @@
   // menu) takes priority over the restored session, so a shortcut always lands where it says.
   try {
     var qp = new URLSearchParams(window.location.search).get("view");
-    if (qp && ["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "freshdesk", "jira", "twilio"].indexOf(qp) !== -1) {
+    if (qp && ["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio"].indexOf(qp) !== -1) {
       initialView = qp;
     }
   } catch (e) {}
