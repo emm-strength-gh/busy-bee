@@ -1,7 +1,7 @@
 {
   "name": "Busy Bee Pro",
   "short_name": "Busy Bee",
-  "description": "Personal productivity suite: lists, notes, JSON tools, FreshDesk/JIRA/Twilio analytics, a Markdown viewer, a PDF viewer, and a world clock — all in one offline-capable app.",
+  "description": "Personal productivity suite: lists, notes, JSON tools, FreshDesk/JIRA/Twilio analytics, a Study Manager, a Markdown viewer, a PDF viewer, and a world clock — all in one offline-capable app.",
   "start_url": "./index.html",
   "scope": "./",
   "id": "./index.html",

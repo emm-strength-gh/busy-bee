@@ -42,12 +42,39 @@ Repository: <https://github.com/emm-strength-gh/busy-bee>
 | **FreshDesk Report** | Load a Freshdesk ticket CSV export for volume, agent and helpdesk-performance breakdowns; date-range filters (7d/21d/30d/1m/3m/all), unresolved and "Immediate Attention Required" ticket lists, and a monthly **Summary & Analysis** view |
 | **JIRA Dashboard** | Import a JIRA support-ticket JSON export to see a dashboard, with a link to open the matching filter in Jira |
 | **Twilio** | Import a Twilio call-log CSV export for a call-volume dashboard |
+| **Study Manager** | Track studies (study name, Study ID, tenant, sponsor, study mailbox) with a status of **Active**, **Draft** or **Closed** and any number of **study managers** and **project coordinators**. Add, edit and delete studies; add or remove people as name chips; change status straight from a study card. Filter by status, tenant, sponsor or person, search, sort, and export to CSV. Import an existing list from **.xlsx** or **.csv** (see below) |
 | **Markdown Viewer** | Renders `.md` files (marked + highlight.js) with text highlighting |
 | **World Clock** | Five time zones (Stockholm, London, New York, Chicago, Manila) with live weather |
 | **PDF Viewer** | Open or drop a PDF (pdf.js) to view and highlight it |
 | **Install App** | Appears when the browser is ready to install the PWA |
-| **Open file / Save backup / Export CSV** | Restore from or save a JSON backup of all lists (including Markdown/PDF highlights); export lists as CSV |
-| **Clear all data** | Wipes all lists, highlights and session state, resetting to the two starter lists |
+| **Open file / Save backup / Export CSV** | Restore from or save a JSON backup of all lists (including Study Manager studies and Markdown/PDF highlights); export lists as CSV |
+| **Clear all data** | Wipes all lists, Study Manager studies, highlights and session state, resetting to the two starter lists |
+
+### Study Manager import
+**Import** accepts `.xlsx` (the first worksheet) or `.csv`. The header row is detected automatically,
+and columns are matched by name:
+
+| Column header contains | Becomes |
+|---|---|
+| "Study ID" / "Protocol" | Study ID |
+| "Mail" | Study mailbox |
+| "Coordinator" | Project coordinators |
+| "Manager" | Study managers |
+| "Status" | Status (`Active` / `Draft` / `Closed`; anything else or blank → Active) |
+| "Sponsor" | Sponsor |
+| "Tenant" | Tenant |
+| "Study" / "Name" | Study name |
+
+- Several people in one cell are split on `/`, `,`, `;`, `&`, "and" and "or".
+- A row with no study name uses its Study ID, or failing that its sponsor/tenant, as the name.
+- Re-importing **merges**: rows matching an existing study (by Study ID, otherwise by name)
+  update it, and everything else is added.
+- `.xlsx` files are read by a small built-in reader (the browser's `DecompressionStream`), so no
+  extra library is needed and it works offline.
+
+**Privacy:** the study list (including people's names) is stored only in your browser. It is
+never written into the app's files, so it isn't published to the public GitHub repo. Use
+**Save backup** to keep a copy or move it to another device.
 
 ### App shortcuts
 The manifest defines home-screen / taskbar shortcuts that open the app directly on a view via
@@ -99,6 +126,7 @@ All data lives in the browser's `localStorage` for the site's origin:
 | `busybee_fd_v1` | Imported FreshDesk data |
 | `busybee_jira_v1` | Imported JIRA data |
 | `busybee_twilio_v1` | Imported Twilio data |
+| `busybee_studies_v1` | Study Manager studies |
 | `busybee_md_hl_mirror_v1` / `busybee_pdf_hl_mirror_v1` | Mirrored Markdown/PDF highlights (included in backups) |
 
 Browser storage can be cleared (private browsing, clearing site data, a new device), so use
@@ -135,7 +163,7 @@ Browser storage can be cleared (private browsing, clearing site data, a new devi
 1. Edit `index.html` (or the other files).
 2. Bump the version at the top of `sw.js` so browsers drop the old cache:
    ```js
-   const CACHE_VERSION = "v12"; // was "v11"
+   const CACHE_VERSION = "v13"; // was "v12"
    ```
 3. Upload/commit with a message describing what changed, then push. Visitors get the new
    version on their next visit or app relaunch.

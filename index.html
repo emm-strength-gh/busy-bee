@@ -1033,6 +1033,79 @@
     .fd-sum-table thead th { background: #d98b3a !important; color: #fff !important; }
     .fd-sum-table tbody th { background: #e0a04a !important; color: #fff !important; }
   }
+
+  /* ---------- Study Manager ---------- */
+  .sm-kpi-btn { text-align: left; font: inherit; cursor: pointer; transition: border-color .12s, transform .12s; }
+  .sm-kpi-btn:hover { border-color: var(--pine); }
+  .sm-kpi-btn.sel { border-color: var(--pine); box-shadow: 0 0 0 2px rgba(46,90,78,.18), var(--shadow); }
+  .sm-kpi-btn .k-value { display: flex; align-items: center; gap: 8px; }
+  .sm-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+  .sm-dot.active { background: var(--pine); }
+  .sm-dot.draft { background: var(--gold); }
+  .sm-dot.closed { background: var(--faint); }
+  .sm-filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .sm-select { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 10px; max-width: 220px; }
+  .sm-select:focus { outline: none; border-color: var(--pine); }
+  .sm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .sm-card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px 16px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; overflow: hidden; }
+  .sm-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--pine); }
+  .sm-card.st-draft::before { background: var(--gold); }
+  .sm-card.st-closed::before { background: var(--faint); }
+  .sm-card.st-closed { opacity: .82; }
+  .sm-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .sm-card-actions { display: flex; gap: 4px; }
+  .sm-icon-btn { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--muted); cursor: pointer; }
+  .sm-icon-btn:hover { background: var(--bg); color: var(--ink); border-color: var(--border); }
+  .sm-icon-btn.danger:hover { color: var(--clay); background: var(--clay-soft); border-color: transparent; }
+  .sm-icon-btn svg { width: 16px; height: 16px; }
+  .sm-status-sel { appearance: none; -webkit-appearance: none; font: inherit; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border: none; border-radius: 999px; padding: 5px 24px 5px 11px; cursor: pointer; background-repeat: no-repeat; background-position: right 8px center; background-size: 9px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23888' stroke-width='1.6'/%3E%3C/svg%3E"); }
+  .sm-status-sel.active { color: var(--pine); background-color: rgba(46,90,78,.12); }
+  .sm-status-sel.draft { color: var(--gold); background-color: var(--gold-soft); }
+  .sm-status-sel.closed { color: var(--muted); background-color: var(--border); }
+  html[data-theme="dark"] .sm-status-sel.active { background-color: rgba(107,191,163,.14); }
+  .sm-status-sel:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
+  .sm-card-title { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 17px; line-height: 1.25; margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+  .sm-card-id { display: inline-block; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; margin-top: 5px; overflow-wrap: anywhere; }
+  .sm-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+  .sm-meta dt { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 0 0 2px; }
+  .sm-meta dd { margin: 0; font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+  .sm-meta dd.none, .sm-none { color: var(--faint); font-style: italic; font-size: 13px; }
+  .sm-people-cap { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 0 0 5px; }
+  .sm-chiprow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sm-chip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; font: inherit; font-size: 12.5px; font-weight: 500; padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; background: #e7eaf6; color: #3b4d8f; overflow-wrap: anywhere; }
+  .sm-chip.coord { background: #e0f0ef; color: #1f6e6a; }
+  html[data-theme="dark"] .sm-chip { background: #252c45; color: #aab8ee; }
+  html[data-theme="dark"] .sm-chip.coord { background: #1c3533; color: #8fd3cd; }
+  button.sm-chip { cursor: pointer; }
+  button.sm-chip:hover { border-color: currentColor; }
+  .sm-chip-x { width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; border: none; background: transparent; color: inherit; cursor: pointer; font-size: 14px; line-height: 1; padding: 0; opacity: .7; }
+  .sm-chip-x:hover { opacity: 1; background: rgba(0,0,0,.08); }
+  .sm-mail { font-size: 12.5px; color: var(--daily); text-decoration: none; overflow-wrap: anywhere; }
+  .sm-mail:hover { text-decoration: underline; }
+  .sm-empty-grid { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 14px; }
+  .sm-board-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 14px; }
+  /* Editor modal */
+  .modal.sm-modal { max-width: 580px; max-height: calc(100vh - 40px); overflow-y: auto; }
+  .sm-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+  .sm-form-grid .full { grid-column: 1 / -1; }
+  .sm-field { margin-bottom: 14px; min-width: 0; }
+  .modal .sm-field input { margin-bottom: 0; }
+  .sm-seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; }
+  .sm-seg button { font: inherit; font-size: 14px; padding: 9px 16px; background: transparent; border: none; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; }
+  .sm-seg button + button { border-left: 1px solid var(--border-strong); }
+  .sm-seg button.sel { background: var(--bg); color: var(--ink); font-weight: 600; }
+  .sm-chipbox { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 8px; min-height: 46px; border: 1px solid var(--border-strong); border-radius: 10px; background: #fcfdfb; cursor: text; }
+  html[data-theme="dark"] .sm-chipbox, html[data-theme="dark"] .modal input { background: var(--bg); }
+  .sm-chipbox:focus-within { border-color: var(--pine); box-shadow: 0 0 0 3px rgba(46,90,78,.12); }
+  .modal .sm-chipbox input { flex: 1; min-width: 140px; width: auto; border: none; padding: 4px; background: transparent !important; box-shadow: none; font-size: 14px; }
+  .sm-hint { font-size: 12px; color: var(--faint); margin: 5px 0 0; }
+  #studyManagerView .jira-head-actions { flex-wrap: wrap; }
+  #studyManagerView .jira-head-actions button { white-space: nowrap; }
+  @media (max-width: 560px) {
+    .sm-form-grid, .sm-meta { grid-template-columns: 1fr; }
+    #studyManagerView .jira-head-actions button { padding: 10px 12px; }
+    .sm-select { max-width: none; flex: 1 1 140px; }
+  }
 </style>
 </head>
 <body>
@@ -1799,6 +1872,66 @@
         </div>
       </section>
 
+      <!-- STUDY MANAGER -->
+      <section class="view" id="studyManagerView">
+        <div class="jira-head">
+          <div>
+            <h1 class="page-title" style="margin-bottom:4px;">Study Manager</h1>
+            <p class="jt-sub" id="smSub" style="margin-bottom:0;">Studies with their tenant, sponsor, status, study managers and project coordinators.</p>
+          </div>
+          <div class="jira-head-actions">
+            <button type="button" class="btn-ghost hidden" id="smExportBtn">&#8595; Export CSV</button>
+            <button type="button" class="btn-ghost" id="smImportBtn">&#8593; Import</button>
+            <button type="button" class="btn-solid" id="smAddBtn">+ Add study</button>
+          </div>
+        </div>
+
+        <input type="file" id="smFileInput" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none">
+        <div class="jt-status hidden" id="smStatus"></div>
+
+        <!-- Empty state -->
+        <div class="jt-card" id="smEmpty">
+          <p class="jt-card-label">Get started</p>
+          <div class="jt-upload-area" id="smUploadArea">
+            <div class="jt-upload-icon">&#128203;</div>
+            <strong>Import a study list (.xlsx or .csv)</strong>
+            <p>click to choose, or drag &amp; drop your file here &mdash; columns like <i>Study Name, Sponsor, Tenant, Study ID, Study Mailbox, Project Manager, Project Coordinators, Status</i> are picked up automatically</p>
+          </div>
+          <p class="jt-sub" style="margin:14px 0 0;text-align:center;">or <button type="button" class="btn-ghost" id="smAddFirstBtn" style="padding:8px 14px;">add a study manually</button></p>
+        </div>
+
+        <!-- Board -->
+        <div id="smBoard" class="hidden">
+          <div class="fd-kpis" id="smKpis"></div>
+
+          <div class="jt-card" style="padding:16px 18px;">
+            <div class="sm-filters">
+              <input type="search" class="jira-search" id="smSearch" placeholder="Search study, ID, sponsor, tenant, person&hellip;" autocomplete="off">
+              <select class="sm-select" id="smTenantFilter" aria-label="Filter by tenant"></select>
+              <select class="sm-select" id="smSponsorFilter" aria-label="Filter by sponsor"></select>
+              <select class="sm-select" id="smPersonFilter" aria-label="Filter by person"></select>
+              <select class="sm-select" id="smSort" aria-label="Sort studies">
+                <option value="status">Sort: Status</option>
+                <option value="name">Sort: Study name</option>
+                <option value="tenant">Sort: Tenant</option>
+                <option value="sponsor">Sort: Sponsor</option>
+                <option value="updated">Sort: Recently updated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sm-board-foot">
+            <span class="jt-sub" id="smShowing" style="margin:0;"></span>
+            <span style="display:flex;gap:8px;">
+              <button type="button" class="jira-clear hidden" id="smClearFilters">&times; Clear filters</button>
+              <button type="button" class="btn-ghost" id="smClearAllBtn" data-label="Delete all studies" style="padding:7px 12px;font-size:13px;">Delete all studies</button>
+            </span>
+          </div>
+
+          <div class="sm-grid" id="smGrid"></div>
+        </div>
+      </section>
+
     </div>
   </div>
 
@@ -1855,6 +1988,10 @@
       <button class="tools-item" id="navTwilio" role="menuitem">
         <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
         <span class="nav-label">Twilio</span>
+      </button>
+      <button class="tools-item" id="navStudyManager" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6.5L4.6 18.2A2 2 0 0 0 6.3 21h11.4a2 2 0 0 0 1.7-2.8L14 9.5V3"/><path d="M7.5 15h9"/></svg></span>
+        <span class="nav-label">Study Manager</span>
       </button>
       <button class="tools-item" id="navMarkdownViewer" role="menuitem">
         <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 15h2l2-3 2 5 2-3h2"/></svg></span>
@@ -1948,11 +2085,78 @@
   </div>
 </div>
 
+<!-- Study Manager: add / edit study -->
+<div class="modal-overlay" id="smModal">
+  <div class="modal sm-modal" role="dialog" aria-modal="true" aria-labelledby="smModalTitle">
+    <h3 id="smModalTitle">Add study</h3>
+    <p class="modal-sub">Only the study name is required. Add as many study managers and project coordinators as you need.</p>
+    <div class="sm-form-grid">
+      <div class="sm-field full">
+        <label for="smName">Study name</label>
+        <input id="smName" type="text" maxlength="200" autocomplete="off" placeholder="e.g. ABC-123 Phase 3 Study" />
+      </div>
+      <div class="sm-field">
+        <label for="smTenant">Tenant</label>
+        <input id="smTenant" type="text" maxlength="120" autocomplete="off" list="smTenantList" />
+      </div>
+      <div class="sm-field">
+        <label for="smSponsor">Sponsor</label>
+        <input id="smSponsor" type="text" maxlength="120" autocomplete="off" list="smSponsorList" />
+      </div>
+      <div class="sm-field">
+        <label for="smStudyId">Study ID</label>
+        <input id="smStudyId" type="text" maxlength="120" autocomplete="off" />
+      </div>
+      <div class="sm-field">
+        <label for="smMailbox">Study mailbox</label>
+        <input id="smMailbox" type="email" maxlength="200" autocomplete="off" placeholder="study@example.com" />
+      </div>
+      <div class="sm-field full">
+        <label>Status</label>
+        <div class="sm-seg" id="smStatusSeg" role="radiogroup" aria-label="Status">
+          <button type="button" data-status="active" role="radio"><span class="sm-dot active"></span>Active</button>
+          <button type="button" data-status="draft" role="radio"><span class="sm-dot draft"></span>Draft</button>
+          <button type="button" data-status="closed" role="radio"><span class="sm-dot closed"></span>Closed</button>
+        </div>
+      </div>
+      <div class="sm-field full">
+        <label for="smManagersInput">Study managers</label>
+        <div class="sm-chipbox" data-field="managers"><input id="smManagersInput" type="text" list="smPeopleList" autocomplete="off" placeholder="Type a name, press Enter" /></div>
+      </div>
+      <div class="sm-field full">
+        <label for="smCoordinatorsInput">Project coordinators</label>
+        <div class="sm-chipbox" data-field="coordinators"><input id="smCoordinatorsInput" type="text" list="smPeopleList" autocomplete="off" placeholder="Type a name, press Enter" /></div>
+        <p class="sm-hint">Press Enter or comma to add a name. Click &times; on a name to remove it.</p>
+      </div>
+    </div>
+    <datalist id="smTenantList"></datalist>
+    <datalist id="smSponsorList"></datalist>
+    <datalist id="smPeopleList"></datalist>
+    <p class="modal-error" id="smError"></p>
+    <div class="modal-actions">
+      <button class="btn-ghost" data-close>Cancel</button>
+      <button class="btn-solid" id="smSaveBtn">Save study</button>
+    </div>
+  </div>
+</div>
+
+<!-- Study Manager: delete study -->
+<div class="modal-overlay" id="smDelModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="smDelTitle">
+    <h3 id="smDelTitle">Delete study</h3>
+    <p class="modal-sub">Delete <b id="smDelName"></b>? This removes the study and its assigned people from Study Manager. This can’t be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" data-close>Cancel</button>
+      <button class="btn-solid danger" id="smDelConfirmBtn">Delete study</button>
+    </div>
+  </div>
+</div>
+
 <!-- Clear all data modal -->
 <div class="modal-overlay" id="clearModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
     <h3 id="clearTitle">Clear all data</h3>
-    <p class="modal-sub">This removes <b>all your lists and items</b> (and any Markdown Viewer or PDF Viewer highlights) from this app and empties the saved session, resetting to the two starter lists. This can’t be undone — if you want to keep your data, use <b>Save backup</b> first.</p>
+    <p class="modal-sub">This removes <b>all your lists and items</b> (plus Study Manager studies and any Markdown Viewer or PDF Viewer highlights) from this app and empties the saved session, resetting to the two starter lists. This can’t be undone — if you want to keep your data, use <b>Save backup</b> first.</p>
     <label for="clearConfirm">Type <b>clear</b> to confirm</label>
     <input id="clearConfirm" type="text" placeholder="clear" autocomplete="off" />
     <p class="modal-error" id="clearError"></p>
@@ -2263,7 +2467,7 @@
       });
     });
     return chain.then(function () {
-      return { app: "Busy Bee", version: 5, savedAt: new Date().toISOString(), lists: out, mdHighlights: collectMdHighlights(), pdfHighlights: collectPdfHighlights() };
+      return { app: "Busy Bee", version: 5, savedAt: new Date().toISOString(), lists: out, mdHighlights: collectMdHighlights(), pdfHighlights: collectPdfHighlights(), studies: window.bbStudies ? window.bbStudies.get() : [] };
     });
   }
 
@@ -2559,11 +2763,12 @@
     resetDailies();
     if (data && data.mdHighlights) restoreMdHighlights(data.mdHighlights, true);
     if (data && data.pdfHighlights) restorePdfHighlights(data.pdfHighlights, true);
+    if (data && Array.isArray(data.studies) && window.bbStudies) window.bbStudies.set(data.studies);
     dirty = false; persistNow(); renderHome(); renderCounters();
     var items = DATA.lists.reduce(function (a, l) { return a + l.items.length; }, 0);
     var hlCount = (data && data.mdHighlights ? Object.keys(data.mdHighlights).length : 0) +
                   (data && data.pdfHighlights ? Object.keys(data.pdfHighlights).length : 0);
-    toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + (hlCount ? (" · " + hlCount + " highlighted doc" + (hlCount === 1 ? "" : "s")) : "") + ".");
+    toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + (hlCount ? (" · " + hlCount + " highlighted doc" + (hlCount === 1 ? "" : "s")) : "") + (data && Array.isArray(data.studies) && data.studies.length ? (" · " + data.studies.length + " stud" + (data.studies.length === 1 ? "y" : "ies")) : "") + ".");
   }
   // Wipe all lists/items and the saved session, resetting to the two starter lists.
   // (Persisted so it survives reload — the point is a clean slate, not just an in-memory reset.)
@@ -2573,6 +2778,7 @@
     resetDailies();
     clearMdHighlights();
     clearPdfHighlights();
+    if (window.bbStudies) window.bbStudies.clear();
     dirty = false; persistNow();
     show("overview");
     renderHome(); renderCounters();
@@ -2751,6 +2957,8 @@
     if (jira) jira.classList.toggle("active", currentView === "jira");
     var tw = document.getElementById("navTwilio");
     if (tw) tw.classList.toggle("active", currentView === "twilio");
+    var smn = document.getElementById("navStudyManager");
+    if (smn) smn.classList.toggle("active", currentView === "study-manager");
     var items = document.querySelectorAll("#navLists .nav-item");
     Array.prototype.forEach.call(items, function (b) {
       b.classList.toggle("active", currentView === "list" && b.getAttribute("data-listid") === currentListId);
@@ -2939,6 +3147,8 @@
         svg: '<path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/><path d="m9 12 2 2 4-4"/>' },
       { label: "Twilio", view: "twilio", accent: 4,
         svg: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/>' },
+      { label: "Study Manager", view: "study-manager", accent: 2,
+        svg: '<path d="M9 3h6"/><path d="M10 3v6.5L4.6 18.2A2 2 0 0 0 6.3 21h11.4a2 2 0 0 0 1.7-2.8L14 9.5V3"/><path d="M7.5 15h9"/>' },
       { label: "Markdown Viewer", view: "markdown-viewer", accent: 5,
         svg: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 15h2l2-3 2 5 2-3h2"/>' },
       { label: "World Clock", view: "world-clock", accent: 0,
@@ -3629,13 +3839,15 @@
     $("fdSummaryView").classList.toggle("active", view === "fd-summary");
     $("jiraView").classList.toggle("active", view === "jira");
     $("twilioView").classList.toggle("active", view === "twilio");
+    $("studyManagerView").classList.toggle("active", view === "study-manager");
     updateNavActive();
     closeNav(); // close mobile drawer after navigating
     var c = document.querySelector(".content"); if (c) c.scrollTop = 0;
-    if (c) c.classList.toggle("content-wide", view === "freshdesk" || view === "fd-tickets");
+    if (c) c.classList.toggle("content-wide", view === "freshdesk" || view === "fd-tickets" || view === "study-manager");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   window.fdShowView = show;   // lets other IIFEs (e.g. FreshDesk) navigate views
+  window.bbToast = toast;     // lets other IIFEs (e.g. Study Manager) show toasts
   function openList(id) {
     var l = getList(id); if (!l) return;
     currentListId = id;
@@ -3781,6 +3993,7 @@
   $("navFreshdesk").addEventListener("click", function () { relockAll(function () { show("freshdesk"); }); });
   $("navJira").addEventListener("click", function () { relockAll(function () { show("jira"); }); });
   $("navTwilio").addEventListener("click", function () { relockAll(function () { show("twilio"); }); });
+  $("navStudyManager").addEventListener("click", function () { relockAll(function () { show("study-manager"); }); });
   $("fdTicketsBackBtn").addEventListener("click", function () { show("freshdesk"); });
   $("fdSummaryBackBtn").addEventListener("click", function () { show("freshdesk"); });
   (function () {
@@ -4112,14 +4325,14 @@
     var sess = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
     if (sess && sess.view) {
       var v = (sess.view === "fd-tickets" || sess.view === "fd-summary") ? "freshdesk" : sess.view;
-      if (["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio"].indexOf(v) !== -1) initialView = v;
+      if (["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio", "study-manager"].indexOf(v) !== -1) initialView = v;
     }
   } catch (e) {}
   // A "?view=" URL param (used by the PWA manifest's app shortcuts / home-screen long-press
   // menu) takes priority over the restored session, so a shortcut always lands where it says.
   try {
     var qp = new URLSearchParams(window.location.search).get("view");
-    if (qp && ["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio"].indexOf(qp) !== -1) {
+    if (qp && ["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio", "study-manager"].indexOf(qp) !== -1) {
       initialView = qp;
     }
   } catch (e) {}
@@ -7250,6 +7463,542 @@
       }
       showEmpty(true);
     })();
+  })();
+
+  // ─── Study Manager ───────────────────────────────────────────────────────────
+  // Studies (tenant, sponsor, status, study managers, project coordinators) kept in this
+  // browser only (localStorage) — nothing ships in the source, so people's names never end up
+  // in the deployed files. A list can be imported from .xlsx/.csv, is included in "Save
+  // backup", and is wiped by "Clear all data" (via the window.bbStudies hook).
+  (function () {
+    var SM_KEY = 'busybee_studies_v1';
+    var STATUSES = [
+      { k: 'active', label: 'Active' },
+      { k: 'draft', label: 'Draft' },
+      { k: 'closed', label: 'Closed' }
+    ];
+    var STATUS_ORDER = { active: 0, draft: 1, closed: 2 };
+    var studies = [];
+    var filt = { q: '', status: 'all', tenant: '', sponsor: '', person: '' };
+    var sortKey = 'status';
+    var editingId = null, deletingId = null;
+    var draft = { status: 'active', managers: [], coordinators: [] };
+
+    function smEl(id) { return document.getElementById(id); }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function uid() { return 'st' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+    function toast(m) { if (window.bbToast) window.bbToast(m); }
+    function clean(s) { return String(s == null ? '' : s).replace(/ /g, ' ').replace(/\s+/g, ' ').trim(); }
+    function lc(s) { return clean(s).toLowerCase(); }
+    function normStatus(s) { s = lc(s); return (s === 'active' || s === 'draft' || s === 'closed') ? s : ''; }
+    function uniqNames(arr) {
+      var seen = {}, out = [];
+      (arr || []).forEach(function (n) { n = clean(n); var k = n.toLowerCase(); if (n && !seen[k]) { seen[k] = 1; out.push(n); } });
+      return out;
+    }
+    // "A / B", "A, B and C", "A or usually B" → ["A", "B", "C"]
+    function splitPeople(s) {
+      s = clean(s); if (!s) return [];
+      return uniqNames(s.split(/\s*(?:\/|,|;|&|\band\b|\bor\b)\s*/i).map(function (p) { return p.replace(/^usually\s+/i, ''); }));
+    }
+    function sanitize(s) {
+      var now = new Date().toISOString();
+      s = s || {};
+      return {
+        id: s.id || uid(),
+        name: clean(s.name), studyId: clean(s.studyId), tenant: clean(s.tenant), sponsor: clean(s.sponsor),
+        mailbox: clean(s.mailbox), status: normStatus(s.status) || 'active',
+        managers: uniqNames(s.managers), coordinators: uniqNames(s.coordinators),
+        created: s.created || now, updated: s.updated || now
+      };
+    }
+    function persist() {
+      try {
+        if (studies.length) localStorage.setItem(SM_KEY, JSON.stringify(studies));
+        else localStorage.removeItem(SM_KEY);
+      } catch (e) {}
+    }
+    function getStudy(id) { for (var i = 0; i < studies.length; i++) if (studies[i].id === id) return studies[i]; return null; }
+    function setStatus(type, msg) {
+      var st = smEl('smStatus');
+      if (!type) { st.className = 'jt-status hidden'; st.textContent = ''; return; }
+      st.className = 'jt-status ' + type; st.textContent = msg;
+    }
+
+    window.bbStudies = {
+      get: function () { return studies.map(function (s) { return JSON.parse(JSON.stringify(s)); }); },
+      set: function (arr) { studies = (Array.isArray(arr) ? arr : []).map(sanitize); persist(); render(); },
+      clear: function () { studies = []; persist(); render(); }
+    };
+
+    // ---- Rendering ----
+    function distinct(field) {
+      var seen = {}, out = [];
+      studies.forEach(function (s) {
+        var vals = Array.isArray(s[field]) ? s[field] : [s[field]];
+        vals.forEach(function (v) { var k = lc(v); if (k && !seen[k]) { seen[k] = 1; out.push(clean(v)); } });
+      });
+      return out.sort(function (a, b) { return a.localeCompare(b); });
+    }
+    function allPeople() { return uniqNames(distinct('managers').concat(distinct('coordinators'))).sort(function (a, b) { return a.localeCompare(b); }); }
+    function fillSelect(id, allLabel, values, current) {
+      var sel = smEl(id);
+      var html = '<option value="">' + esc(allLabel) + '</option>';
+      values.forEach(function (v) { html += '<option value="' + esc(v) + '">' + esc(v) + '</option>'; });
+      sel.innerHTML = html;
+      var ok = values.some(function (v) { return v === current; });
+      sel.value = ok ? current : '';
+      return ok ? current : '';
+    }
+    function fillDatalist(id, values) {
+      smEl(id).innerHTML = values.map(function (v) { return '<option value="' + esc(v) + '"></option>'; }).join('');
+    }
+    function matches(s) {
+      if (filt.status !== 'all' && s.status !== filt.status) return false;
+      if (filt.tenant && lc(s.tenant) !== lc(filt.tenant)) return false;
+      if (filt.sponsor && lc(s.sponsor) !== lc(filt.sponsor)) return false;
+      if (filt.person) {
+        var p = lc(filt.person);
+        if (!s.managers.concat(s.coordinators).some(function (n) { return lc(n) === p; })) return false;
+      }
+      if (filt.q) {
+        var hay = [s.name, s.studyId, s.tenant, s.sponsor, s.mailbox, s.status].concat(s.managers, s.coordinators).join(' \u0001 ').toLowerCase();
+        if (hay.indexOf(filt.q) === -1) return false;
+      }
+      return true;
+    }
+    function sorter(a, b) {
+      function by(k) { return (a[k] || '￿').localeCompare(b[k] || '￿', undefined, { sensitivity: 'base' }); }
+      if (sortKey === 'updated') return (b.updated || '').localeCompare(a.updated || '');
+      if (sortKey === 'status') return (STATUS_ORDER[a.status] - STATUS_ORDER[b.status]) || by('name');
+      if (sortKey === 'tenant' || sortKey === 'sponsor') return by(sortKey) || by('name');
+      return by('name') || by('studyId');
+    }
+    var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+    var ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>';
+    function peopleBlock(cap, names, cls) {
+      var chips = names.length
+        ? names.map(function (n) { return '<button type="button" class="sm-chip' + cls + '" data-person="' + esc(n) + '" title="Show studies for ' + esc(n) + '">' + esc(n) + '</button>'; }).join('')
+        : '<span class="sm-none">None assigned</span>';
+      return '<div><p class="sm-people-cap">' + cap + '</p><div class="sm-chiprow">' + chips + '</div></div>';
+    }
+    function cardHtml(s) {
+      var opts = STATUSES.map(function (o) { return '<option value="' + o.k + '"' + (o.k === s.status ? ' selected' : '') + '>' + o.label + '</option>'; }).join('');
+      var title = s.name || s.studyId || 'Untitled study';
+      var showId = s.studyId && lc(s.studyId) !== lc(title);
+      return '<article class="sm-card st-' + s.status + '" data-id="' + esc(s.id) + '">' +
+        '<div class="sm-card-top">' +
+          '<select class="sm-status-sel ' + s.status + '" data-act="status" aria-label="Status">' + opts + '</select>' +
+          '<div class="sm-card-actions">' +
+            '<button type="button" class="sm-icon-btn" data-act="edit" title="Edit study" aria-label="Edit study">' + ICON_EDIT + '</button>' +
+            '<button type="button" class="sm-icon-btn danger" data-act="delete" title="Delete study" aria-label="Delete study">' + ICON_DEL + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div><h3 class="sm-card-title">' + esc(title) + '</h3>' + (showId ? '<span class="sm-card-id">' + esc(s.studyId) + '</span>' : '') + '</div>' +
+        '<dl class="sm-meta">' +
+          '<div><dt>Tenant</dt><dd' + (s.tenant ? '>' + esc(s.tenant) : ' class="none">Not set') + '</dd></div>' +
+          '<div><dt>Sponsor</dt><dd' + (s.sponsor ? '>' + esc(s.sponsor) : ' class="none">Not set') + '</dd></div>' +
+        '</dl>' +
+        peopleBlock('Study managers', s.managers, '') +
+        peopleBlock('Project coordinators', s.coordinators, ' coord') +
+        (s.mailbox ? '<a class="sm-mail" href="mailto:' + esc(s.mailbox) + '">&#9993; ' + esc(s.mailbox) + '</a>' : '') +
+      '</article>';
+    }
+    function render() {
+      var has = studies.length > 0;
+      smEl('smEmpty').classList.toggle('hidden', has);
+      smEl('smBoard').classList.toggle('hidden', !has);
+      smEl('smExportBtn').classList.toggle('hidden', !has);
+      fillDatalist('smTenantList', distinct('tenant'));
+      fillDatalist('smSponsorList', distinct('sponsor'));
+      fillDatalist('smPeopleList', allPeople());
+      if (!has) return;
+
+      var counts = { all: studies.length, active: 0, draft: 0, closed: 0 };
+      studies.forEach(function (s) { counts[s.status]++; });
+      var kpis = [{ k: 'all', label: 'All studies' }].concat(STATUSES);
+      smEl('smKpis').innerHTML = kpis.map(function (o) {
+        return '<button type="button" class="fd-kpi sm-kpi-btn' + (filt.status === o.k ? ' sel' : '') + '" data-status="' + o.k + '">' +
+          '<div class="k-label">' + o.label + '</div>' +
+          '<div class="k-value">' + (o.k !== 'all' ? '<span class="sm-dot ' + o.k + '"></span>' : '') + counts[o.k] + '</div></button>';
+      }).join('');
+
+      filt.tenant = fillSelect('smTenantFilter', 'All tenants', distinct('tenant'), filt.tenant);
+      filt.sponsor = fillSelect('smSponsorFilter', 'All sponsors', distinct('sponsor'), filt.sponsor);
+      filt.person = fillSelect('smPersonFilter', 'All people', allPeople(), filt.person);
+
+      var list = studies.filter(matches).sort(sorter);
+      smEl('smGrid').innerHTML = list.length
+        ? list.map(cardHtml).join('')
+        : '<div class="sm-empty-grid" style="grid-column:1/-1;">No studies match these filters.</div>';
+      var filtered = filt.q || filt.status !== 'all' || filt.tenant || filt.sponsor || filt.person;
+      smEl('smShowing').textContent = filtered
+        ? 'Showing ' + list.length + ' of ' + studies.length + ' stud' + (studies.length === 1 ? 'y' : 'ies')
+        : studies.length + ' stud' + (studies.length === 1 ? 'y' : 'ies');
+      smEl('smClearFilters').classList.toggle('hidden', !filtered);
+    }
+
+    // ---- Board interactions ----
+    smEl('smKpis').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-status]'); if (!b) return;
+      var k = b.getAttribute('data-status');
+      filt.status = (filt.status === k && k !== 'all') ? 'all' : k;
+      render();
+    });
+    smEl('smSearch').addEventListener('input', function () { filt.q = lc(this.value); render(); });
+    smEl('smTenantFilter').addEventListener('change', function () { filt.tenant = this.value; render(); });
+    smEl('smSponsorFilter').addEventListener('change', function () { filt.sponsor = this.value; render(); });
+    smEl('smPersonFilter').addEventListener('change', function () { filt.person = this.value; render(); });
+    smEl('smSort').addEventListener('change', function () { sortKey = this.value; render(); });
+    smEl('smClearFilters').addEventListener('click', function () {
+      filt = { q: '', status: 'all', tenant: '', sponsor: '', person: '' };
+      smEl('smSearch').value = '';
+      render();
+    });
+    smEl('smGrid').addEventListener('click', function (e) {
+      var card = e.target.closest('.sm-card'); if (!card) return;
+      var id = card.getAttribute('data-id');
+      var person = e.target.closest('[data-person]');
+      if (person) { filt.person = person.getAttribute('data-person'); render(); return; }
+      var act = e.target.closest('[data-act]'); if (!act) return;
+      var a = act.getAttribute('data-act');
+      if (a === 'edit') openEditor(id);
+      else if (a === 'delete') openDelete(id);
+    });
+    smEl('smGrid').addEventListener('change', function (e) {
+      if (!e.target.matches('[data-act="status"]')) return;
+      var s = getStudy(e.target.closest('.sm-card').getAttribute('data-id')); if (!s) return;
+      s.status = normStatus(e.target.value) || 'active';
+      s.updated = new Date().toISOString();
+      persist(); render();
+      toast('“' + (s.name || s.studyId) + '” is now ' + s.status + '.');
+    });
+
+    // ---- Add / edit modal ----
+    function openModal(id) { smEl(id).classList.add('open'); }
+    function closeModal(id) { smEl(id).classList.remove('open'); }
+    function paintStatusSeg() {
+      Array.prototype.forEach.call(smEl('smStatusSeg').querySelectorAll('button'), function (b) {
+        var on = b.getAttribute('data-status') === draft.status;
+        b.classList.toggle('sel', on); b.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    }
+    function paintChips(field) {
+      var box = document.querySelector('.sm-chipbox[data-field="' + field + '"]');
+      var input = box.querySelector('input');
+      Array.prototype.forEach.call(box.querySelectorAll('.sm-chip'), function (c) { c.remove(); });
+      draft[field].forEach(function (n, i) {
+        var chip = document.createElement('span');
+        chip.className = 'sm-chip' + (field === 'coordinators' ? ' coord' : '');
+        chip.appendChild(document.createTextNode(n));
+        var x = document.createElement('button');
+        x.type = 'button'; x.className = 'sm-chip-x'; x.setAttribute('aria-label', 'Remove ' + n); x.textContent = '×';
+        x.addEventListener('click', function (e) { e.stopPropagation(); draft[field].splice(i, 1); paintChips(field); input.focus(); });
+        chip.appendChild(x);
+        box.insertBefore(chip, input);
+      });
+    }
+    function commitPending(field) {
+      var box = document.querySelector('.sm-chipbox[data-field="' + field + '"]');
+      var input = box.querySelector('input');
+      var names = splitPeople(input.value);
+      if (!names.length) { input.value = ''; return; }
+      draft[field] = uniqNames(draft[field].concat(names));
+      input.value = '';
+      paintChips(field);
+    }
+    ['managers', 'coordinators'].forEach(function (field) {
+      var box = document.querySelector('.sm-chipbox[data-field="' + field + '"]');
+      var input = box.querySelector('input');
+      box.addEventListener('click', function (e) { if (e.target === box) input.focus(); });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',' || e.key === ';') {
+          if (input.value.trim()) { e.preventDefault(); commitPending(field); }
+          else if (e.key === 'Enter') { e.preventDefault(); }
+        } else if (e.key === 'Backspace' && !input.value && draft[field].length) {
+          draft[field].pop(); paintChips(field);
+        }
+      });
+      // Picking a suggestion from the datalist fires "input" with the full value.
+      input.addEventListener('input', function (e) {
+        if (e.inputType === 'insertReplacementText' || e.inputType === undefined) {
+          var v = lc(input.value);
+          if (v && allPeople().some(function (n) { return lc(n) === v; })) commitPending(field);
+        }
+      });
+      input.addEventListener('blur', function () { commitPending(field); });
+    });
+    smEl('smStatusSeg').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-status]'); if (!b) return;
+      draft.status = b.getAttribute('data-status'); paintStatusSeg();
+    });
+
+    function openEditor(id) {
+      var s = id ? getStudy(id) : null;
+      editingId = s ? s.id : null;
+      smEl('smModalTitle').textContent = s ? 'Edit study' : 'Add study';
+      smEl('smSaveBtn').textContent = s ? 'Save changes' : 'Add study';
+      smEl('smName').value = s ? s.name : '';
+      smEl('smTenant').value = s ? s.tenant : '';
+      smEl('smSponsor').value = s ? s.sponsor : '';
+      smEl('smStudyId').value = s ? s.studyId : '';
+      smEl('smMailbox').value = s ? s.mailbox : '';
+      smEl('smManagersInput').value = '';
+      smEl('smCoordinatorsInput').value = '';
+      smEl('smError').textContent = '';
+      draft = { status: s ? s.status : 'active', managers: s ? s.managers.slice() : [], coordinators: s ? s.coordinators.slice() : [] };
+      paintStatusSeg(); paintChips('managers'); paintChips('coordinators');
+      openModal('smModal');
+      setTimeout(function () { smEl('smName').focus(); }, 40);
+    }
+    function saveEditor() {
+      commitPending('managers'); commitPending('coordinators');
+      var name = clean(smEl('smName').value), studyId = clean(smEl('smStudyId').value);
+      var err = smEl('smError');
+      if (!name) { err.textContent = 'Please enter a study name.'; smEl('smName').focus(); return; }
+      var mailbox = clean(smEl('smMailbox').value);
+      if (mailbox && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mailbox)) { err.textContent = 'That study mailbox doesn’t look like an email address.'; smEl('smMailbox').focus(); return; }
+      var dupe = studies.some(function (s) {
+        if (s.id === editingId) return false;
+        return studyId ? lc(s.studyId) === lc(studyId) : (!s.studyId && lc(s.name) === lc(name));
+      });
+      if (dupe) { err.textContent = studyId ? 'Another study already uses this Study ID.' : 'A study with this name already exists.'; return; }
+      var now = new Date().toISOString();
+      var fields = { name: name, studyId: studyId, tenant: clean(smEl('smTenant').value), sponsor: clean(smEl('smSponsor').value), mailbox: mailbox, status: draft.status, managers: uniqNames(draft.managers), coordinators: uniqNames(draft.coordinators), updated: now };
+      if (editingId) {
+        var s = getStudy(editingId);
+        Object.keys(fields).forEach(function (k) { s[k] = fields[k]; });
+        toast('Saved “' + name + '”.');
+      } else {
+        fields.id = uid(); fields.created = now;
+        studies.push(sanitize(fields));
+        toast('Added “' + name + '”.');
+      }
+      persist(); closeModal('smModal'); render();
+    }
+    smEl('smSaveBtn').addEventListener('click', saveEditor);
+    smEl('smModal').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.tagName === 'INPUT' && !e.target.closest('.sm-chipbox')) { e.preventDefault(); saveEditor(); }
+    });
+    smEl('smAddBtn').addEventListener('click', function () { openEditor(null); });
+    smEl('smAddFirstBtn').addEventListener('click', function () { openEditor(null); });
+
+    // ---- Delete ----
+    function openDelete(id) {
+      var s = getStudy(id); if (!s) return;
+      deletingId = id;
+      smEl('smDelName').textContent = s.name || s.studyId;
+      openModal('smDelModal');
+    }
+    smEl('smDelConfirmBtn').addEventListener('click', function () {
+      var s = getStudy(deletingId);
+      studies = studies.filter(function (x) { return x.id !== deletingId; });
+      deletingId = null;
+      persist(); closeModal('smDelModal'); render();
+      if (s) toast('Deleted “' + (s.name || s.studyId) + '”.');
+    });
+    (function () {
+      var btn = smEl('smClearAllBtn'), armed = false, timer = null;
+      btn.addEventListener('click', function () {
+        if (!armed) {
+          armed = true; btn.classList.add('armed'); btn.textContent = 'Confirm delete all?';
+          timer = setTimeout(function () { armed = false; btn.classList.remove('armed'); btn.textContent = btn.getAttribute('data-label'); }, 3000);
+          return;
+        }
+        clearTimeout(timer); armed = false; btn.classList.remove('armed'); btn.textContent = btn.getAttribute('data-label');
+        var n = studies.length;
+        studies = []; filt = { q: '', status: 'all', tenant: '', sponsor: '', person: '' }; smEl('smSearch').value = '';
+        persist(); setStatus(); render();
+        toast('Deleted ' + n + ' stud' + (n === 1 ? 'y' : 'ies') + '.');
+      });
+    })();
+
+    // ---- Import (.xlsx via a tiny built-in reader, or .csv) ----
+    // Reads the first worksheet of an .xlsx with the browser's own DecompressionStream, so it
+    // works offline and needs no extra library.
+    function readXlsx(buf) {
+      var u8 = new Uint8Array(buf), dv = new DataView(buf), dec = new TextDecoder();
+      var eocd = -1;
+      for (var i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) { if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; } }
+      if (eocd < 0) return Promise.reject(new Error('Not a valid .xlsx file.'));
+      var count = dv.getUint16(eocd + 10, true), p = dv.getUint32(eocd + 16, true), entries = {};
+      for (var n = 0; n < count; n++) {
+        if (dv.getUint32(p, true) !== 0x02014b50) break;
+        var method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+        var nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+        var off = dv.getUint32(p + 42, true);
+        entries[dec.decode(u8.subarray(p + 46, p + 46 + nlen))] = { method: method, csize: csize, off: off };
+        p += 46 + nlen + xlen + clen;
+      }
+      function file(name) {
+        var e = entries[name]; if (!e) return Promise.resolve(null);
+        var start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+        var data = u8.subarray(start, start + e.csize);
+        if (e.method === 0) return Promise.resolve(dec.decode(data));
+        if (typeof DecompressionStream === 'undefined') return Promise.reject(new Error('This browser can’t read .xlsx files — save the sheet as .csv and import that instead.'));
+        return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+      }
+      function xml(t) { return new DOMParser().parseFromString(t, 'application/xml'); }
+      function textOf(node) { var ts = node.getElementsByTagName('t'), s = ''; for (var i = 0; i < ts.length; i++) { if (!ts[i].closest || !ts[i].closest('rPh')) s += ts[i].textContent; } return s; }
+      var sheetPath = 'xl/worksheets/sheet1.xml';
+      return Promise.all([file('xl/workbook.xml'), file('xl/_rels/workbook.xml.rels')]).then(function (r) {
+        if (r[0] && r[1]) {
+          var first = xml(r[0]).getElementsByTagName('sheet')[0];
+          var rid = first && (first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id'));
+          var rels = xml(r[1]).getElementsByTagName('Relationship');
+          for (var i = 0; i < rels.length; i++) if (rels[i].getAttribute('Id') === rid) {
+            var tgt = rels[i].getAttribute('Target');
+            sheetPath = tgt.charAt(0) === '/' ? tgt.slice(1) : 'xl/' + tgt.replace(/^\.\//, '');
+          }
+        }
+        return Promise.all([file('xl/sharedStrings.xml'), file(sheetPath)]);
+      }).then(function (r) {
+        if (!r[1]) throw new Error('Couldn’t find a worksheet in that file.');
+        var shared = [];
+        if (r[0]) { var sis = xml(r[0]).getElementsByTagName('si'); for (var i = 0; i < sis.length; i++) shared.push(textOf(sis[i])); }
+        var rows = [], rs = xml(r[1]).getElementsByTagName('row');
+        for (var ri = 0; ri < rs.length; ri++) {
+          var row = [], cs = rs[ri].getElementsByTagName('c');
+          for (var ci = 0; ci < cs.length; ci++) {
+            var c = cs[ci], ref = c.getAttribute('r') || '', col = 0;
+            var m = ref.match(/^[A-Z]+/);
+            if (m) { for (var k = 0; k < m[0].length; k++) col = col * 26 + (m[0].charCodeAt(k) - 64); col -= 1; } else col = row.length;
+            var t = c.getAttribute('t'), v = c.getElementsByTagName('v')[0], val = '';
+            if (t === 's' && v) val = shared[parseInt(v.textContent, 10)] || '';
+            else if (t === 'inlineStr') val = textOf(c);
+            else if (v) val = v.textContent;
+            row[col] = val;
+          }
+          for (var f = 0; f < row.length; f++) if (row[f] == null) row[f] = '';
+          rows.push(row);
+        }
+        return rows;
+      });
+    }
+    function parseCsv(text) {
+      text = text.replace(/^﻿/, '');
+      var rows = [], row = [], cell = '', q = false;
+      for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (q) {
+          if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+          else cell += ch;
+        } else if (ch === '"') q = true;
+        else if (ch === ',') { row.push(cell); cell = ''; }
+        else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+        else cell += ch;
+      }
+      if (cell || row.length) { row.push(cell); rows.push(row); }
+      return rows;
+    }
+    // Header names → study fields (first match wins, so "Study ID" isn't taken as the name).
+    var COLS = [
+      { f: 'studyId', re: /study\s*id|protocol/i },
+      { f: 'mailbox', re: /mail/i },
+      { f: 'coordinators', re: /coordinator/i },
+      { f: 'managers', re: /manager/i },
+      { f: 'status', re: /status/i },
+      { f: 'sponsor', re: /sponsor/i },
+      { f: 'tenant', re: /tenant/i },
+      { f: 'name', re: /study|name|title/i }
+    ];
+    function rowsToStudies(rows) {
+      var hi = -1, map = {};
+      for (var i = 0; i < Math.min(rows.length, 10) && hi < 0; i++) {
+        var m = {};
+        rows[i].forEach(function (h, ci) {
+          h = clean(h); if (!h) return;
+          for (var k = 0; k < COLS.length; k++) if (COLS[k].re.test(h)) { if (m[COLS[k].f] == null) m[COLS[k].f] = ci; break; }
+        });
+        if (m.name != null || m.studyId != null) { hi = i; map = m; }
+      }
+      if (hi < 0) throw new Error('Couldn’t find a header row with a Study Name or Study ID column.');
+      var out = [];
+      rows.slice(hi + 1).forEach(function (r) {
+        function g(f) { return map[f] != null ? clean(r[map[f]]) : ''; }
+        var s = {
+          name: g('name'), studyId: g('studyId'), tenant: g('tenant'), sponsor: g('sponsor'), mailbox: g('mailbox'),
+          status: normStatus(g('status')), managers: splitPeople(g('managers')), coordinators: splitPeople(g('coordinators'))
+        };
+        // No study name → use the Study ID, else the sponsor/tenant (so rows that only say who
+        // covers a sponsor's studies still come in; they can be renamed afterwards).
+        if (!s.name) s.name = s.studyId || s.sponsor || s.tenant;
+        if (s.name) out.push(s);
+      });
+      return out;
+    }
+    // Merge: a row matching an existing study (by Study ID, else by name) updates the fields it
+    // has values for; everything else is added. Status defaults to Active when the file has none.
+    function mergeStudies(incoming) {
+      var added = 0, updated = 0, now = new Date().toISOString();
+      incoming.forEach(function (inc) {
+        var hit = null;
+        for (var i = 0; i < studies.length && !hit; i++) {
+          var s = studies[i];
+          if (inc.studyId ? lc(s.studyId) === lc(inc.studyId) : (!s.studyId && lc(s.name) === lc(inc.name))) hit = s;
+        }
+        if (hit) {
+          ['name', 'studyId', 'tenant', 'sponsor', 'mailbox', 'status'].forEach(function (k) { if (inc[k]) hit[k] = inc[k]; });
+          if (inc.managers.length) hit.managers = inc.managers;
+          if (inc.coordinators.length) hit.coordinators = inc.coordinators;
+          hit.updated = now; updated++;
+        } else {
+          inc.created = now; inc.updated = now;
+          studies.push(sanitize(inc)); added++;
+        }
+      });
+      return { added: added, updated: updated };
+    }
+    function importFile(f) {
+      if (!f) return;
+      var isXlsx = /\.xlsx$/i.test(f.name), isCsv = /\.csv$/i.test(f.name);
+      if (!isXlsx && !isCsv) { setStatus('error', '⚠️ Please choose an .xlsx or .csv file.'); return; }
+      setStatus('success', 'Reading ' + f.name + '…');
+      var p = isXlsx ? f.arrayBuffer().then(readXlsx) : f.text().then(parseCsv);
+      p.then(function (rows) {
+        var incoming = rowsToStudies(rows);
+        if (!incoming.length) throw new Error('No studies found in that file.');
+        var res = mergeStudies(incoming);
+        persist(); render();
+        setStatus('success', '✅ Imported ' + f.name + ': ' + res.added + ' new, ' + res.updated + ' updated. Studies without a status in the file were set to Active — change any study’s status from its card.');
+      }).catch(function (err) {
+        setStatus('error', '⚠️ ' + (err && err.message ? err.message : 'Couldn’t read that file.'));
+      });
+    }
+    var fileInput = smEl('smFileInput');
+    smEl('smImportBtn').addEventListener('click', function () { fileInput.click(); });
+    smEl('smUploadArea').addEventListener('click', function () { fileInput.click(); });
+    fileInput.addEventListener('change', function () { importFile(fileInput.files[0]); fileInput.value = ''; });
+    var view = smEl('studyManagerView'), area = smEl('smUploadArea');
+    view.addEventListener('dragover', function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') !== -1) { e.preventDefault(); area.classList.add('drag-over'); } });
+    view.addEventListener('dragleave', function (e) { if (!view.contains(e.relatedTarget)) area.classList.remove('drag-over'); });
+    view.addEventListener('drop', function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault(); area.classList.remove('drag-over');
+      importFile(e.dataTransfer.files[0]);
+    });
+
+    // ---- Export CSV ----
+    smEl('smExportBtn').addEventListener('click', function () {
+      function c(v) { v = String(v == null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+      var head = ['Study Name', 'Study ID', 'Tenant', 'Sponsor', 'Status', 'Study Managers', 'Project Coordinators', 'Study Mailbox'];
+      var lines = [head.join(',')].concat(studies.slice().sort(sorter).map(function (s) {
+        var st = STATUSES.filter(function (o) { return o.k === s.status; })[0];
+        return [s.name, s.studyId, s.tenant, s.sponsor, st ? st.label : s.status, s.managers.join('; '), s.coordinators.join('; '), s.mailbox].map(c).join(',');
+      }));
+      var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'studies-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+
+    // ---- Restore ----
+    try {
+      var raw = localStorage.getItem(SM_KEY);
+      if (raw) { var arr = JSON.parse(raw); if (Array.isArray(arr)) studies = arr.map(sanitize); }
+    } catch (e) { try { localStorage.removeItem(SM_KEY); } catch (e2) {} }
+    render();
   })();
 
   // ─── PWA: service worker registration + "Install App" prompt ─────────────
