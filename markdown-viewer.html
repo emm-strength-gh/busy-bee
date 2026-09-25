@@ -32,6 +32,7 @@
     --shadow: rgba(0,0,0,0.3);
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
@@ -176,7 +177,7 @@
   .dropzone .big { font-size: 16px; color: var(--text); font-weight: 500; }
 
   #content { font-size: 16px; line-height: 1.7; }
-  #content h1, #content h2, #content h3, #content h4 {
+  #content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
     font-weight: 600;
     line-height: 1.3;
     margin-top: 1.8em;
@@ -571,18 +572,42 @@
     if (highlights.length) flashHint(highlights.length + ' saved highlight' + (highlights.length === 1 ? '' : 's') + ' loaded for "' + currentFileName + '".');
   }
 
+  // GitHub-flavored heading slug: lowercase, strip punctuation (keep letters/numbers/space/
+  // hyphen), then turn each individual space into a hyphen. This matches the anchors GitHub
+  // itself generates, which is what most authors assume when hand-writing a "Contents"
+  // section with links like [Chapter 1](#chapter-1) — so those links need real IDs that match
+  // this exact scheme, not arbitrary ones, or clicking them silently goes nowhere.
+  function githubSlug(text) {
+    return text.toLowerCase()
+      .replace(/[^\p{L}\p{N} -]/gu, '')
+      .replace(/ /g, '-');
+  }
+
   function buildTOC() {
+    // Assign a real slug to EVERY heading level (not just what the sidebar shows), so an
+    // in-document link pointing at an h4/h5/h6 still resolves correctly. GitHub computes one
+    // shared de-dup counter across the whole document regardless of heading level, so we do
+    // the same — the `seen` map spans all of them together, in document order.
+    const allHeadings = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const seen = {}; // base slug -> count, for GitHub's own de-dup scheme (x, x-1, x-2, ...)
+    allHeadings.forEach((h) => {
+      const base = githubSlug(h.textContent) || 'section';
+      let id = base;
+      if (seen[base] === undefined) seen[base] = 0;
+      else { seen[base]++; id = base + '-' + seen[base]; }
+      h.id = id;
+    });
+
+    // The sidebar itself only lists the top 3 levels, to keep it scannable.
     const headings = content.querySelectorAll('h1, h2, h3');
     toc.innerHTML = '';
     if (!headings.length) {
       toc.innerHTML = '<div class="toc-empty">No headings found</div>';
       return;
     }
-    headings.forEach((h, i) => {
-      const id = 'heading-' + i;
-      h.id = id;
+    headings.forEach((h) => {
       const a = document.createElement('a');
-      a.href = '#' + id;
+      a.href = '#' + h.id;
       a.textContent = h.textContent;
       a.style.paddingLeft = (h.tagName === 'H1' ? 8 : h.tagName === 'H2' ? 20 : 32) + 'px';
       a.addEventListener('click', (e) => {

@@ -438,10 +438,14 @@
   }
 
   /* ---------------- settings ---------------- */
-  var LS="worldclock.v1";
+  // Intentionally NOT persisted anywhere (no localStorage, no cache): World Clock always
+  // starts from these exact defaults, and nothing about it — display prefs or font size —
+  // is remembered across a refresh/reload. If an earlier version of this page left a saved
+  // settings key behind, we clear it once so there's no leftover local state at all.
+  var LS = "worldclock.v1";
+  try { localStorage.removeItem(LS); } catch (e) {}
   var cfg={hour12:false,seconds:true,date:true,light:false,fontSize:null};
-  try{ var raw=localStorage.getItem(LS); if(raw) cfg=Object.assign(cfg,JSON.parse(raw)); }catch(e){}
-  function save(){ try{ localStorage.setItem(LS,JSON.stringify(cfg)); }catch(e){} }
+  function save(){ /* no-op by design — see note above */ }
 
   /* ---------------- online time sync ---------------- */
   var offsetMs = 0;              // trueTime = Date.now() + offsetMs

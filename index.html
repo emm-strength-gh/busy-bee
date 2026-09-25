@@ -674,6 +674,7 @@
      viewport to show everything without an internal scrollbar; a generous floor here means
      the page itself scrolls on short windows rather than double-scrolling inside the iframe. */
   #worldClockFrame { display: block; width: 100%; height: calc(100vh - 150px); min-height: 1050px; border: none; background: var(--surface); }
+  #pdfViewerFrame { display: block; width: 100%; height: calc(100vh - 150px); min-height: 900px; border: none; background: var(--surface); }
   .jt-tile {
     display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
     text-align: left; padding: 24px; border-radius: var(--radius);
@@ -1385,6 +1386,27 @@
         </div>
       </section>
 
+      <section class="view" id="pdfViewerView">
+        <div class="jt-back-row">
+          <button class="jt-back-btn" id="pdfViewerBackBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Home
+          </button>
+        </div>
+
+        <div class="fd-toolbar" style="margin-bottom:14px;">
+          <div>
+            <h1 class="page-title" style="margin-bottom:4px;">PDF Viewer</h1>
+            <p class="jt-sub" style="margin:0;">Open or drop a .pdf file to view it, with page navigation, zoom, and a highlighter.</p>
+          </div>
+          <a class="btn-ghost" href="pdf-viewer.html" target="_blank" rel="noopener noreferrer" title="Open the viewer in its own browser tab">Open in new tab &#8599;</a>
+        </div>
+
+        <div class="md-viewer-frame-wrap">
+          <iframe id="pdfViewerFrame" src="pdf-viewer.html" title="PDF Viewer" loading="lazy"></iframe>
+        </div>
+      </section>
+
       <!-- FreshDesk ticket analytics -->
       <section class="view" id="freshdeskView">
         <h1 class="page-title" style="margin-bottom:4px;">FreshDesk Report</h1>
@@ -1842,6 +1864,10 @@
         <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
         <span class="nav-label">World Clock</span>
       </button>
+      <button class="tools-item" id="navPdfViewer" role="menuitem">
+        <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 15h1"/><path d="M9 11h6"/><path d="M9 18h6"/></svg></span>
+        <span class="nav-label">PDF Viewer</span>
+      </button>
       <div class="tools-sep"></div>
       <button class="tools-item hidden" id="pwaInstallBtn" type="button" role="menuitem" title="Install Busy Bee as an app on this device">
         <span class="nav-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></span>
@@ -1926,7 +1952,7 @@
 <div class="modal-overlay" id="clearModal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
     <h3 id="clearTitle">Clear all data</h3>
-    <p class="modal-sub">This removes <b>all your lists and items</b> from this app and empties the saved session, resetting to the two starter lists. This can’t be undone — if you want to keep your data, use <b>Save backup</b> first.</p>
+    <p class="modal-sub">This removes <b>all your lists and items</b> (and any Markdown Viewer or PDF Viewer highlights) from this app and empties the saved session, resetting to the two starter lists. This can’t be undone — if you want to keep your data, use <b>Save backup</b> first.</p>
     <label for="clearConfirm">Type <b>clear</b> to confirm</label>
     <input id="clearConfirm" type="text" placeholder="clear" autocomplete="off" />
     <p class="modal-error" id="clearError"></p>
@@ -2236,8 +2262,146 @@
         base.items = l.items; out.push(base);
       });
     });
-    return chain.then(function () { return { app: "Busy Bee", version: 5, savedAt: new Date().toISOString(), lists: out }; });
+    return chain.then(function () {
+      return { app: "Busy Bee", version: 5, savedAt: new Date().toISOString(), lists: out, mdHighlights: collectMdHighlights(), pdfHighlights: collectPdfHighlights() };
+    });
   }
+
+  // ---- Markdown Viewer highlights. The viewer runs in an iframe; when it's same-origin it
+  // shares this localStorage, but opened from disk (file://) it usually does NOT. So we also
+  // keep a live mirror the viewer pushes up via postMessage, and merge both sources so a
+  // single "Save backup" always captures the latest document highlights. ----
+  var MD_HL_PREFIX = "mdv-highlights::v1::";
+  var MD_HL_MIRROR_KEY = "busybee_md_hl_mirror_v1";
+  var mdHlMirror = {};   // { "<filename>": [ {block,start,end,color}, ... ] }
+  try { var _m = JSON.parse(localStorage.getItem(MD_HL_MIRROR_KEY) || "{}"); if (_m && typeof _m === "object") mdHlMirror = _m; } catch (e) {}
+  function saveMdMirror() { try { localStorage.setItem(MD_HL_MIRROR_KEY, JSON.stringify(mdHlMirror)); } catch (e) {} }
+
+  function collectMdHighlights() {
+    var out = {};
+    // Start with the mirror (authoritative when storage isn't shared)...
+    Object.keys(mdHlMirror).forEach(function (name) {
+      if (Array.isArray(mdHlMirror[name]) && mdHlMirror[name].length) out[name] = mdHlMirror[name];
+    });
+    // ...then overlay anything found directly in shared localStorage (authoritative when it IS
+    // shared and possibly more recent).
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(MD_HL_PREFIX) === 0) {
+          try {
+            var arr = JSON.parse(localStorage.getItem(k));
+            if (Array.isArray(arr) && arr.length) out[k.slice(MD_HL_PREFIX.length)] = arr;
+            else delete out[k.slice(MD_HL_PREFIX.length)]; // emptied in shared storage -> drop
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    return out;
+  }
+  // Restore highlights from a backup into localStorage so the viewer auto-loads them.
+  // `replace` (used on Clear / full import) first removes existing highlight keys.
+  //
+  // Robustness note: a same-origin iframe *usually* shares this localStorage, but when the
+  // app is opened directly from disk (file://) many browsers give the iframe a separate
+  // opaque origin, so it does NOT share storage. To work in both cases we ALSO hand the full
+  // highlight map to the viewer via postMessage; the viewer writes it into its own storage.
+  function restoreMdHighlights(map, replace) {
+    // Update the mirror first (this is what a later "Save backup" will read).
+    if (replace) mdHlMirror = {};
+    if (map && typeof map === "object") {
+      Object.keys(map).forEach(function (name) {
+        if (Array.isArray(map[name]) && map[name].length) mdHlMirror[name] = map[name];
+      });
+    }
+    saveMdMirror();
+    try {
+      if (replace) {
+        var toRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf(MD_HL_PREFIX) === 0) toRemove.push(k);
+        }
+        toRemove.forEach(function (k) { localStorage.removeItem(k); });
+      }
+      if (map && typeof map === "object") {
+        Object.keys(map).forEach(function (name) {
+          var val = map[name];
+          if (Array.isArray(val) && val.length) localStorage.setItem(MD_HL_PREFIX + name, JSON.stringify(val));
+        });
+      }
+    } catch (e) {}
+    // Push the data straight into the viewer regardless of storage sharing. It stores its own
+    // copy and refreshes if it's showing a file. Retried after a tick in case the lazy iframe
+    // hasn't finished loading yet.
+    postToViewer("markdownViewerFrame", { type: "mdv-restore-highlights", map: map || {}, replace: !!replace });
+  }
+  // Keep the latest restore payload so a freshly-loaded iframe can request it on startup.
+  var lastMdHighlightPayload = null;
+  function postToViewer(frameId, msg) {
+    if (msg && msg.type === "mdv-restore-highlights") lastMdHighlightPayload = msg;
+    var frame = document.getElementById(frameId);
+    function send() { try { if (frame && frame.contentWindow) frame.contentWindow.postMessage(msg, "*"); } catch (e) {} }
+    send();
+    setTimeout(send, 400); // retry once for a still-loading lazy iframe
+  }
+  function clearMdHighlights() { restoreMdHighlights({}, true); }
+
+  // ---- PDF Viewer highlights. Same story as Markdown Viewer above: a live mirror kept in
+  // sync via postMessage (the iframe may not share this localStorage on file://), folded into
+  // the same JSON backup so one "Save backup" captures lists + both viewers' highlights. ----
+  var PDF_HL_PREFIX = "pdfv-highlights::v1::";
+  var PDF_HL_MIRROR_KEY = "busybee_pdf_hl_mirror_v1";
+  var pdfHlMirror = {};   // { "<filename>": [ {page,rects,color}, ... ] }
+  try { var _pm = JSON.parse(localStorage.getItem(PDF_HL_MIRROR_KEY) || "{}"); if (_pm && typeof _pm === "object") pdfHlMirror = _pm; } catch (e) {}
+  function savePdfMirror() { try { localStorage.setItem(PDF_HL_MIRROR_KEY, JSON.stringify(pdfHlMirror)); } catch (e) {} }
+
+  function collectPdfHighlights() {
+    var out = {};
+    Object.keys(pdfHlMirror).forEach(function (name) {
+      if (Array.isArray(pdfHlMirror[name]) && pdfHlMirror[name].length) out[name] = pdfHlMirror[name];
+    });
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(PDF_HL_PREFIX) === 0) {
+          try {
+            var arr = JSON.parse(localStorage.getItem(k));
+            if (Array.isArray(arr) && arr.length) out[k.slice(PDF_HL_PREFIX.length)] = arr;
+            else delete out[k.slice(PDF_HL_PREFIX.length)];
+          } catch (e) {}
+        }
+      }
+    } catch (e) {}
+    return out;
+  }
+  function restorePdfHighlights(map, replace) {
+    if (replace) pdfHlMirror = {};
+    if (map && typeof map === "object") {
+      Object.keys(map).forEach(function (name) {
+        if (Array.isArray(map[name]) && map[name].length) pdfHlMirror[name] = map[name];
+      });
+    }
+    savePdfMirror();
+    try {
+      if (replace) {
+        var toRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf(PDF_HL_PREFIX) === 0) toRemove.push(k);
+        }
+        toRemove.forEach(function (k) { localStorage.removeItem(k); });
+      }
+      if (map && typeof map === "object") {
+        Object.keys(map).forEach(function (name) {
+          var val = map[name];
+          if (Array.isArray(val) && val.length) localStorage.setItem(PDF_HL_PREFIX + name, JSON.stringify(val));
+        });
+      }
+    } catch (e) {}
+    postToViewer("pdfViewerFrame", { type: "pdfv-restore-highlights", map: map || {}, replace: !!replace });
+  }
+  function clearPdfHighlights() { restorePdfHighlights({}, true); }
   // Marks unsaved-to-file state (for the close/refresh warning) and schedules a debounced
   // localStorage write so the change survives closing and reopening the app.
   function save() {
@@ -2393,9 +2557,13 @@
     ensureBuiltins();
     selected = {}; currentListId = null; unlocked = {}; sessionKey = {};
     resetDailies();
+    if (data && data.mdHighlights) restoreMdHighlights(data.mdHighlights, true);
+    if (data && data.pdfHighlights) restorePdfHighlights(data.pdfHighlights, true);
     dirty = false; persistNow(); renderHome(); renderCounters();
     var items = DATA.lists.reduce(function (a, l) { return a + l.items.length; }, 0);
-    toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + ".");
+    var hlCount = (data && data.mdHighlights ? Object.keys(data.mdHighlights).length : 0) +
+                  (data && data.pdfHighlights ? Object.keys(data.pdfHighlights).length : 0);
+    toast("Loaded " + DATA.lists.length + " lists, " + items + " item" + (items === 1 ? "" : "s") + (hlCount ? (" · " + hlCount + " highlighted doc" + (hlCount === 1 ? "" : "s")) : "") + ".");
   }
   // Wipe all lists/items and the saved session, resetting to the two starter lists.
   // (Persisted so it survives reload — the point is a clean slate, not just an in-memory reset.)
@@ -2403,6 +2571,8 @@
     DATA.lists = seedBuiltins();
     selected = {}; currentListId = null; unlocked = {}; sessionKey = {};
     resetDailies();
+    clearMdHighlights();
+    clearPdfHighlights();
     dirty = false; persistNow();
     show("overview");
     renderHome(); renderCounters();
@@ -2573,6 +2743,8 @@
     if (mdv) mdv.classList.toggle("active", currentView === "markdown-viewer");
     var wc = document.getElementById("navWorldClock");
     if (wc) wc.classList.toggle("active", currentView === "world-clock");
+    var pdfv = document.getElementById("navPdfViewer");
+    if (pdfv) pdfv.classList.toggle("active", currentView === "pdf-viewer");
     var fd = document.getElementById("navFreshdesk");
     if (fd) fd.classList.toggle("active", currentView === "freshdesk" || currentView === "fd-tickets");
     var jira = document.getElementById("navJira");
@@ -2770,7 +2942,9 @@
       { label: "Markdown Viewer", view: "markdown-viewer", accent: 5,
         svg: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M7 15h2l2-3 2 5 2-3h2"/>' },
       { label: "World Clock", view: "world-clock", accent: 0,
-        svg: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>' }
+        svg: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>' },
+      { label: "PDF Viewer", view: "pdf-viewer", accent: 1,
+        svg: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 15h1"/><path d="M9 11h6"/><path d="M9 18h6"/>' }
     ];
     var grid = $("appGrid"); if (!grid) return;
     grid.innerHTML = "";
@@ -3449,6 +3623,7 @@
     $("jsonStitchView").classList.toggle("active", view === "json-stitch");
     $("markdownViewerView").classList.toggle("active", view === "markdown-viewer");
     $("worldClockView").classList.toggle("active", view === "world-clock");
+    $("pdfViewerView").classList.toggle("active", view === "pdf-viewer");
     $("freshdeskView").classList.toggle("active", view === "freshdesk");
     $("fdTicketsView").classList.toggle("active", view === "fd-tickets");
     $("fdSummaryView").classList.toggle("active", view === "fd-summary");
@@ -3597,6 +3772,8 @@
   $("markdownViewerBackBtn").addEventListener("click", function () { relockAll(function () { show("overview"); renderHome(); }); });
   $("navWorldClock").addEventListener("click", function () { relockAll(function () { show("world-clock"); }); });
   $("worldClockBackBtn").addEventListener("click", function () { relockAll(function () { show("overview"); renderHome(); }); });
+  $("navPdfViewer").addEventListener("click", function () { relockAll(function () { show("pdf-viewer"); }); });
+  $("pdfViewerBackBtn").addEventListener("click", function () { relockAll(function () { show("overview"); renderHome(); }); });
   $("jtGoCsv").addEventListener("click", function () { show("json-csv"); });
   $("jtGoStitch").addEventListener("click", function () { show("json-stitch"); });
   $("jsonCsvBackBtn").addEventListener("click", function () { show("json"); });
@@ -3892,6 +4069,29 @@
   window.addEventListener("pagehide", flushSaveNow);
   window.addEventListener("focus", checkRollover);
 
+  // Messages from the embedded Markdown Viewer / PDF Viewer iframes.
+  window.addEventListener("message", function (e) {
+    var d = e && e.data;
+    if (!d || typeof d !== "object") return;
+    if (d.type === "mdv-highlights-changed" && typeof d.name === "string") {
+      // Viewer told us its highlights for a file changed — mirror them so "Save backup" has
+      // the latest even when the iframe doesn't share our localStorage (file://).
+      if (Array.isArray(d.highlights) && d.highlights.length) mdHlMirror[d.name] = d.highlights;
+      else delete mdHlMirror[d.name];
+      saveMdMirror();
+    } else if (d.type === "mdv-ready") {
+      // A freshly-(re)loaded viewer asks for the current highlight data; hand it our mirror
+      // so it can populate its own storage even without shared localStorage.
+      if (Object.keys(mdHlMirror).length) postToViewer("markdownViewerFrame", { type: "mdv-restore-highlights", map: mdHlMirror, replace: false });
+    } else if (d.type === "pdfv-highlights-changed" && typeof d.name === "string") {
+      if (Array.isArray(d.highlights) && d.highlights.length) pdfHlMirror[d.name] = d.highlights;
+      else delete pdfHlMirror[d.name];
+      savePdfMirror();
+    } else if (d.type === "pdfv-ready") {
+      if (Object.keys(pdfHlMirror).length) postToViewer("pdfViewerFrame", { type: "pdfv-restore-highlights", map: pdfHlMirror, replace: false });
+    }
+  });
+
   // Nothing is persisted to disk (as a portable file) — warn before a refresh/close would
   // discard unsaved-to-file work. The in-memory session itself is still safe: flush any
   // pending debounced localStorage write immediately so the last edit isn't lost.
@@ -3912,7 +4112,7 @@
     var sess = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
     if (sess && sess.view) {
       var v = (sess.view === "fd-tickets" || sess.view === "fd-summary") ? "freshdesk" : sess.view;
-      if (["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "freshdesk", "jira", "twilio"].indexOf(v) !== -1) initialView = v;
+      if (["overview", "app-home", "json", "json-csv", "json-stitch", "markdown-viewer", "world-clock", "pdf-viewer", "freshdesk", "jira", "twilio"].indexOf(v) !== -1) initialView = v;
     }
   } catch (e) {}
   // A "?view=" URL param (used by the PWA manifest's app shortcuts / home-screen long-press
