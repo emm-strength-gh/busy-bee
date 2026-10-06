@@ -31,6 +31,7 @@
     --code-bg: #24262a;
     --shadow: rgba(0,0,0,0.3);
   }
+  :root { --tabbar-h: 0px; }  /* set to the tab bar's height by JS while any file is open */
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
@@ -41,10 +42,10 @@
     min-height: 100vh;
     transition: background 0.15s ease, color 0.15s ease;
   }
+  /* Sticky wrapper holds the top bar AND the file tabs, so both stay pinned together. */
+  .top-sticky { position: sticky; top: 0; z-index: 10; background: var(--bg); }
   .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -137,9 +138,9 @@
     flex-shrink: 0;
     padding: 28px 12px 40px 20px;
     position: sticky;
-    top: calc(53px + env(safe-area-inset-top));
+    top: calc(53px + env(safe-area-inset-top) + var(--tabbar-h));
     align-self: flex-start;
-    max-height: calc(100vh - 53px - env(safe-area-inset-top));
+    max-height: calc(100vh - 53px - env(safe-area-inset-top) - var(--tabbar-h));
     overflow-y: auto;
     font-size: 13px;
   }
@@ -182,7 +183,7 @@
     line-height: 1.3;
     margin-top: 1.8em;
     margin-bottom: 0.5em;
-    scroll-margin-top: 70px;
+    scroll-margin-top: calc(70px + var(--tabbar-h));
   }
   #content h1 { font-size: 28px; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
   #content h2 { font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
@@ -230,7 +231,34 @@
   #content hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
   #content input[type="checkbox"] { margin-right: 6px; }
 
+
+  /* ---------- File tabs ---------- */
+  .tabbar { display: flex; align-items: flex-end; gap: 6px; height: 38px; padding: 0 12px;
+    background: var(--bg-panel); border-bottom: 1px solid var(--border); }
+  .tabbar[hidden] { display: none; }
+  .tabs-scroll { position: relative; display: flex; align-items: flex-end; gap: 2px; flex: 1 1 auto;
+    min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  .tabs-scroll::-webkit-scrollbar { display: none; }
+  .tab { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; max-width: 200px; height: 31px;
+    padding: 0 6px 0 12px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer;
+    border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0;
+    user-select: none; -webkit-user-select: none; }
+  .tab:hover { background: var(--bg); color: var(--text); }
+  .tab.active { background: var(--bg); color: var(--text); font-weight: 500; border-color: var(--border);
+    box-shadow: inset 0 2px 0 var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .tab-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .tab .tab-close { display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 18px; height: 18px; padding: 0; border: none; border-radius: 4px; background: transparent;
+    color: inherit; font-size: 15px; line-height: 1; opacity: .65; }
+  .tab .tab-close:hover { background: var(--border); opacity: 1; }
+  .tab-add { display: flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 28px;
+    margin-bottom: 4px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg);
+    color: var(--text-secondary); font-size: 17px; line-height: 1; cursor: pointer; }
+  .tab-add:hover { border-color: var(--accent); color: var(--text); }
+
   @media (max-width: 800px) {
+    .tab { max-width: 150px; }
     .toc { display: none; }
     main { padding: 24px 20px 80px; }
     .topbar h1 { display: none; }
@@ -260,6 +288,7 @@
 </head>
 <body>
 
+<div class="top-sticky">
 <div class="topbar">
   <h1>Markdown Viewer</h1>
   <span class="filename" id="filename">No file loaded</span>
@@ -285,14 +314,19 @@
       </button>
     </div>
     <div class="toolbar-sep" aria-hidden="true"></div>
-    <label class="file-btn" for="fileInput">Open .md file</label>
-    <input type="file" id="fileInput" accept=".md,.markdown,.txt">
-    <button id="clearBtn" class="clear-btn" title="Close the current file (your saved highlights are kept for next time)" hidden>
+    <label class="file-btn" for="fileInput">Open .md files</label>
+    <input type="file" id="fileInput" accept=".md,.markdown,.txt" multiple>
+    <button id="clearBtn" class="clear-btn" title="Close the current tab (your saved highlights are kept for next time)" hidden>
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
       Clear
     </button>
     <button id="themeToggle">Dark mode</button>
   </div>
+</div>
+<div class="tabbar" id="tabBar" role="tablist" aria-label="Open files" hidden>
+  <div class="tabs-scroll" id="tabList"></div>
+  <label class="tab-add" for="fileInput" title="Open more files" aria-label="Open more files">+</label>
+</div>
 </div>
 <div class="hl-hint" id="hlHint"></div>
 
@@ -302,8 +336,8 @@
   </nav>
   <main>
     <div class="dropzone" id="dropzone">
-      <p class="big">Drop a .md file here</p>
-      <p>or use "Open .md file" above</p>
+      <p class="big">Drop one or more .md files here</p>
+      <p>or use "Open .md files" above — each opens in its own tab</p>
     </div>
     <div id="content"></div>
   </main>
@@ -551,7 +585,10 @@
     }, 2600);
   }
 
-  function renderMarkdown(text, name) {
+  // opts.silent: used when switching between already-open tabs — skip the "highlights loaded"
+  // toast and the parent handshake, which only make sense when a file is freshly opened.
+  function renderMarkdown(text, name, opts) {
+    const silent = !!(opts && opts.silent);
     content.innerHTML = marked.parse(text);
     dropzone.style.display = 'none';
     filenameEl.textContent = name || 'Untitled document';
@@ -565,11 +602,11 @@
     applyHighlights();
     // Also ask the parent app for its mirrored copy, in case our storage isn't shared with it
     // (file://). It will postMessage the data back and we'll re-apply.
-    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'mdv-ready' }, '*'); } catch (e) {}
+    if (!silent) { try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'mdv-ready' }, '*'); } catch (e) {} }
     hlTools.hidden = false;
     clearBtn.hidden = false;
     markDirty(false);
-    if (highlights.length) flashHint(highlights.length + ' saved highlight' + (highlights.length === 1 ? '' : 's') + ' loaded for "' + currentFileName + '".');
+    if (!silent && highlights.length) flashHint(highlights.length + ' saved highlight' + (highlights.length === 1 ? '' : 's') + ' loaded for "' + currentFileName + '".');
   }
 
   // GitHub-flavored heading slug: lowercase, strip punctuation (keep letters/numbers/space/
@@ -618,14 +655,119 @@
     });
   }
 
-  function loadFile(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => renderMarkdown(e.target.result, file.name);
-    reader.readAsText(file);
+  // ---------- Tabs: any number of files open at once, one tab each ----------
+  const tabBar = document.getElementById('tabBar');
+  const tabList = document.getElementById('tabList');
+  let tabs = [];           // [{ id, name, text, scrollY }]
+  let activeTabId = null;
+  let tabSeq = 0;
+
+  function activeTab() { return tabs.find(t => t.id === activeTabId) || null; }
+
+  function renderTabs() {
+    tabBar.hidden = tabs.length === 0;
+    document.documentElement.style.setProperty('--tabbar-h', tabs.length ? '38px' : '0px');
+    tabList.innerHTML = '';
+    let activeEl = null;
+    tabs.forEach((t) => {
+      const el = document.createElement('div');
+      el.className = 'tab' + (t.id === activeTabId ? ' active' : '');
+      el.setAttribute('role', 'tab');
+      el.setAttribute('aria-selected', String(t.id === activeTabId));
+      el.tabIndex = 0;
+      el.title = t.name;
+      const label = document.createElement('span');
+      label.className = 'tab-name';
+      label.textContent = t.name;
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'tab-close';
+      x.setAttribute('aria-label', 'Close ' + t.name);
+      x.innerHTML = '&times;';
+      x.addEventListener('click', (e) => { e.stopPropagation(); closeTab(t.id); });
+      el.appendChild(label);
+      el.appendChild(x);
+      el.addEventListener('click', () => { if (t.id !== activeTabId) activateTab(t.id); });
+      el.addEventListener('auxclick', (e) => { if (e.button === 1) { e.preventDefault(); closeTab(t.id); } });
+      el.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); if (t.id !== activeTabId) activateTab(t.id); }
+      });
+      tabList.appendChild(el);
+      if (t.id === activeTabId) activeEl = el;
+    });
+    // Keep the active tab visible when there are more tabs than fit in the bar.
+    if (activeEl) {
+      const l = activeEl.offsetLeft, r = l + activeEl.offsetWidth;
+      if (l < tabList.scrollLeft) tabList.scrollLeft = Math.max(0, l - 8);
+      else if (r > tabList.scrollLeft + tabList.clientWidth) tabList.scrollLeft = r - tabList.clientWidth + 8;
+    }
   }
 
-  fileInput.addEventListener('change', (e) => { loadFile(e.target.files[0]); e.target.value = ''; });
+  // Jump without the page-wide smooth scrolling, which would visibly animate a tab switch.
+  function jumpScroll(y) {
+    const root = document.documentElement;
+    root.style.scrollBehavior = 'auto';
+    window.scrollTo(0, y);
+    root.style.scrollBehavior = '';
+  }
+
+  // fresh = the file was just opened (start at the top, show the highlights-loaded hint);
+  // otherwise we're switching back to a tab, so put it back exactly where it was.
+  function activateTab(id, opts) {
+    const t = tabs.find(x => x.id === id);
+    if (!t) return;
+    const cur = activeTab();
+    if (cur) cur.scrollY = window.scrollY || 0;
+    activeTabId = id;
+    const fresh = !!(opts && opts.fresh);
+    renderMarkdown(t.text, t.name, { silent: !fresh });
+    renderTabs();
+    jumpScroll(fresh ? 0 : (t.scrollY || 0));
+  }
+
+  function closeTab(id) {
+    const idx = tabs.findIndex(t => t.id === id);
+    if (idx === -1) return;
+    const wasActive = id === activeTabId;
+    tabs.splice(idx, 1);
+    if (!tabs.length) { activeTabId = null; clearFile(); renderTabs(); return; }
+    if (wasActive) {
+      activeTabId = null; // the closed tab's scroll position is irrelevant
+      activateTab(tabs[Math.min(idx, tabs.length - 1)].id);
+    } else {
+      renderTabs();
+    }
+  }
+
+  function readAsText(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve({ name: file.name, text: String(e.target.result) });
+      reader.onerror = () => resolve(null);
+      reader.readAsText(file);
+    });
+  }
+
+  // Opens every selected/dropped file in its own tab and shows the last one. Re-opening a
+  // file that's already open refreshes that tab instead of adding a duplicate.
+  function loadFiles(fileList) {
+    const files = Array.from(fileList || []); // copy now: the input's FileList is cleared right after
+    if (!files.length) return;
+    Promise.all(files.map(readAsText)).then((results) => {
+      const loaded = results.filter(Boolean);
+      if (!loaded.length) return;
+      let last = null;
+      loaded.forEach((f) => {
+        let t = tabs.find(x => x.name === f.name);
+        if (t) { t.text = f.text; t.scrollY = 0; }
+        else { t = { id: ++tabSeq, name: f.name, text: f.text, scrollY: 0 }; tabs.push(t); }
+        last = t;
+      });
+      activateTab(last.id, { fresh: true });
+    });
+  }
+
+  fileInput.addEventListener('change', (e) => { loadFiles(e.target.files); e.target.value = ''; });
 
   ['dragenter', 'dragover'].forEach(evt => {
     document.addEventListener(evt, (e) => {
@@ -636,10 +778,7 @@
   ['dragleave', 'drop'].forEach(evt => {
     document.addEventListener(evt, (e) => {
       e.preventDefault();
-      if (evt === 'drop') {
-        const file = e.dataTransfer.files[0];
-        loadFile(file);
-      }
+      if (evt === 'drop') loadFiles(e.dataTransfer.files);
       dropzone.classList.remove('dragover');
     });
   });
@@ -728,8 +867,8 @@
   // (covers the case where the iframe loads lazily, after a backup was already opened).
   try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'mdv-ready' }, '*'); } catch (e) {}
 
-  // Close the currently loaded file and return to the empty drop-zone state.
-  // Saved highlights for this filename stay in storage, so re-opening the file restores them.
+  // Reset the viewer to its empty drop-zone state (used when the last tab is closed).
+  // Saved highlights stay in storage, so re-opening a file restores them.
   function clearFile() {
     if (mode) setMode(mode); // toggles the active mode off, clears body classes + hint
     content.innerHTML = '';
@@ -742,7 +881,7 @@
     clearBtn.hidden = true;
     hideHint();
   }
-  clearBtn.addEventListener('click', clearFile);
+  clearBtn.addEventListener('click', () => { if (activeTabId !== null) closeTab(activeTabId); });
 
   // ---------- Mobile "Tools" dropdown ----------
   // On desktop .toolbar-panel is just an inline row (menuToggle is display:none there, so
